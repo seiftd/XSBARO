@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBRFARM Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2d5a27;
+            --primary-light: #4a7c59;
+            --secondary-color: #8bc34a;
+            --accent-color: #ff9800;
+            --background: #f8fdf8;
+            --surface: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 0;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.2rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding-left: 2rem;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .submenu {
+            list-style: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .submenu.expanded {
+            max-height: 300px;
+        }
+
+        .submenu .nav-link {
+            padding-left: 3rem;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background: var(--background);
+            color: var(--primary-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .user-menu:hover {
+            background: var(--background);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Cards and Components */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.users { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.revenue { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.crops { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-icon.vip { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Data Table */
+        .data-table {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            background: var(--background);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .search-box {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--background);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: var(--background);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .badge-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+
+        .badge-vip {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #8b7300;
+            font-weight: 600;
+        }
+
+        /* Crop Icons */
+        .crop-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .crop-potato::before { content: '🥔'; }
+        .crop-tomato::before { content: '🍅'; }
+        .crop-onion::before { content: '🧅'; }
+        .crop-carrot::before { content: '🥕'; }
+
+        /* Water Drop Animation */
+        .water-drop {
+            color: #2196f3;
+            animation: drop 2s infinite;
+        }
+
+        @keyframes drop {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(-5px); opacity: 0.7; }
+        }
+
+        /* Farm Patch Visualization */
+        .farm-patches {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .patch {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .patch.empty {
+            background: #f8f9fa;
+            border-style: dashed;
+        }
+
+        .patch.growing {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border-color: var(--success-color);
+        }
+
+        .patch.ready {
+            background: linear-gradient(135deg, #fff3e0, #ffcc02);
+            border-color: var(--warning-color);
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 204, 2, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(255, 204, 2, 0.8); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        /* Page Specific Styles */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .action-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    SBRFARM Admin
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-section="overview">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="users">
+                        <i class="fas fa-users"></i>
+                        User Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="payments">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Approval
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-toggle="submenu" data-target="contests-submenu">
+                        <i class="fas fa-trophy"></i>
+                        Contests
+                        <i class="fas fa-chevron-down" style="margin-left: auto;"></i>
+                    </a>
+                    <ul class="submenu" id="contests-submenu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-section="contests-daily">Daily Contests</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-section="contests-weekly">Weekly Contests</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-section="contests-monthly">Monthly Contests</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="vip">
+                        <i class="fas fa-crown"></i>
+                        VIP Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="notifications">
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="analytics">
+                        <i class="fas fa-chart-line"></i>
+                        Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="system">
+                        <i class="fas fa-cogs"></i>
+                        System Control
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="settings">
+                        <i class="fas fa-sliders-h"></i>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-toggle" id="mobileToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="header-title" id="pageTitle">Dashboard Overview</h1>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">3</span>
+                    </button>
+                    <div class="user-menu">
+                        <i class="fas fa-user-circle" style="font-size: 1.5rem;"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Overview Section -->
+                <div id="overview" class="section active">
+                    <div id="alerts"></div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <div class="action-card" onclick="showBroadcastModal()">
+                            <div class="action-icon">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div class="action-title">Broadcast Message</div>
+                            <div class="action-description">Send messages to all users</div>
+                        </div>
+                        <div class="action-card" onclick="showGiftModal()">
+                            <div class="action-icon">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <div class="action-title">Send Gifts</div>
+                            <div class="action-description">Reward users with items</div>
+                        </div>
+                        <div class="action-card" onclick="refreshData()">
+                            <div class="action-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="action-title">Refresh Data</div>
+                            <div class="action-description">Update all statistics</div>
+                        </div>
+                        <div class="action-card" onclick="createBackup()">
+                            <div class="action-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="action-title">Backup Database</div>
+                            <div class="action-description">Create system backup</div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Total Users</div>
+                                <div class="stat-icon users">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="newUsersToday">0</span> new today
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Total Revenue</div>
+                                <div class="stat-icon revenue">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="totalRevenue">$0</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                12.5% this month
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Active Farmers</div>
+                                <div class="stat-icon crops">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="activeFarmers">0</div>
+                            <div class="stat-change">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="cropsPlanted">0</span> crops planted
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">VIP Subscribers</div>
+                                <div class="stat-icon vip">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="vipSubscribers">0</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-star"></i>
+                                Premium members
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">User Growth</div>
+                                <select class="form-select" style="width: auto;">
+                                    <option>Last 7 days</option>
+                                    <option>Last 30 days</option>
+                                    <option>Last 90 days</option>
+                                </select>
+                            </div>
+                            <canvas id="userGrowthChart" width="400" height="200"></canvas>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Revenue Trends</div>
+                                <select class="form-select" style="width: auto;">
+                                    <option>Last 7 days</option>
+                                    <option>Last 30 days</option>
+                                    <option>Last 90 days</option>
+                                </select>
+                            </div>
+                            <canvas id="revenueChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="data-table">
+                        <div class="table-header">
+                            <div class="table-title">Recent Activity</div>
+                            <button class="btn btn-primary" onclick="loadRecentActivity()">
+                                <i class="fas fa-refresh"></i>
+                                Refresh
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivityTable">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 2rem;">
+                                        <div class="spinner"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div id="users" class="section">
+                    <div class="data-table">
+                        <div class="table-header">
+                            <div class="table-title">User Management</div>
+                            <div style="display: flex; gap: 1rem;">
+                                <input type="text" class="search-box" placeholder="Search users..." id="userSearch">
+                                <button class="btn btn-primary" onclick="exportUsers()">
+                                    <i class="fas fa-download"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>SBR Coins</th>
+                                    <th>Water <i class="fas fa-tint water-drop"></i></th>
+                                    <th>Patches</th>
+                                    <th>VIP</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Payments Section -->
+                <div id="payments" class="section">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Pending Withdrawals -->
+                        <div class="data-table">
+                            <div class="table-header">
+                                <div class="table-title">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    Pending Withdrawals
+                                </div>
+                                <span class="badge badge-warning" id="pendingWithdrawalsCount">0</span>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Currency</th>
+                                        <th>Wallet</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingWithdrawalsTable">
+                                    <!-- Pending withdrawals will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pending VIP Purchases -->
+                        <div class="data-table">
+                            <div class="table-header">
+                                <div class="table-title">
+                                    <i class="fas fa-crown"></i>
+                                    Pending VIP Purchases
+                                </div>
+                                <span class="badge badge-warning" id="pendingVIPCount">0</span>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Tier</th>
+                                        <th>Amount</th>
+                                        <th>Payment Info</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingVIPTable">
+                                    <!-- Pending VIP purchases will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Payment Information -->
+                    <div class="chart-container" style="margin-top: 2rem;">
+                        <div class="chart-header">
+                            <div class="chart-title">
+                                <i class="fas fa-info-circle"></i>
+                                Payment Information
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                            <div>
+                                <h4>💰 Binance Pay</h4>
+                                <p><strong>Binance ID:</strong> ${process.env.ADMIN_BINANCE_ID || '713636914'}</p>
+                                <p>Users should send payment and provide their transaction hash or Binance ID.</p>
+                            </div>
+                            <div>
+                                <h4>🔷 TON Wallet</h4>
+                                <p><strong>Address:</strong> UQBVeJflae5yTTgS6wczgpDkDcyEAnmA88bZyaiB3lYGqWw9</p>
+                                <p>Users should send TON and provide transaction hash.</p>
+                            </div>
+                            <div>
+                                <h4>💎 TRC20 USDT</h4>
+                                <p><strong>Address:</strong> TLDsutnxpdLZaRxhGWBJismwsjY3WiTHWX</p>
+                                <p>Users should send USDT (TRC20) and provide transaction hash.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections would be implemented similarly -->
+                <div id="contests-daily" class="section">
+                    <h2>Daily Contests Management</h2>
+                    <!-- Daily contests content -->
+                </div>
+
+                <div id="contests-weekly" class="section">
+                    <h2>Weekly Contests Management</h2>
+                    <!-- Weekly contests content -->
+                </div>
+
+                <div id="contests-monthly" class="section">
+                    <h2>Monthly Contests Management</h2>
+                    <!-- Monthly contests content -->
+                </div>
+
+                <div id="vip" class="section">
+                    <h2>VIP Management</h2>
+                    <!-- VIP management content -->
+                </div>
+
+                <div id="notifications" class="section">
+                    <h2>Notification Center</h2>
+                    <!-- Notifications content -->
+                </div>
+
+                <div id="analytics" class="section">
+                    <h2>Advanced Analytics</h2>
+                    <!-- Analytics content -->
+                </div>
+
+                <div id="system" class="section">
+                    <h2>System Control</h2>
+                    <!-- System control content -->
+                </div>
+
+                <div id="settings" class="section">
+                    <h2>Settings</h2>
+                    <!-- Settings content -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="broadcastModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Broadcast Message</h3>
+                <button class="close-btn" onclick="closeBroadcastModal()">&times;</button>
+            </div>
+            <form id="broadcastForm">
+                <div class="form-group">
+                    <label class="form-label">Target Audience</label>
+                    <select class="form-control form-select" id="broadcastTarget">
+                        <option value="all">All Users</option>
+                        <option value="vip">VIP Users Only</option>
+                        <option value="active">Active Users (Last 7 days)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" rows="4" id="broadcastMessage" placeholder="Enter your message..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBroadcastModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Broadcast</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="giftModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Send Gift</h3>
+                <button class="close-btn" onclick="closeGiftModal()">&times;</button>
+            </div>
+            <form id="giftForm">
+                <div class="form-group">
+                    <label class="form-label">User ID</label>
+                    <input type="text" class="form-control" id="giftUserId" placeholder="Enter Telegram ID">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gift Type</label>
+                    <select class="form-control form-select" id="giftType">
+                        <option value="sbr_coins">SBR Coins</option>
+                        <option value="water_drops">Water Drops</option>
+                        <option value="boosters">Boosters</option>
+                        <option value="heavy_water">Heavy Water</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-control" id="giftAmount" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Custom Message (Optional)</label>
+                    <textarea class="form-control" rows="2" id="giftMessage" placeholder="Custom gift message..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeGiftModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Gift</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentSection = 'overview';
+        let authToken = localStorage.getItem('adminToken');
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!authToken) {
+                window.location.href = '/login';
+                return;
+            }
+
+            initializeDashboard();
+            loadOverviewData();
+            setupEventListeners();
+        });
+
+        function initializeDashboard() {
+            // Setup navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (this.dataset.section) {
+                        switchSection(this.dataset.section);
+                    } else if (this.dataset.toggle === 'submenu') {
+                        toggleSubmenu(this.dataset.target);
+                    }
+                });
+            });
+
+            // Mobile toggle
+            document.getElementById('mobileToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('mobile-visible');
+            });
+
+            // Initialize charts
+            initializeCharts();
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('userSearch')?.addEventListener('input', function() {
+                searchUsers(this.value);
+            });
+
+            // Form submissions
+            document.getElementById('broadcastForm')?.addEventListener('submit', handleBroadcast);
+            document.getElementById('giftForm')?.addEventListener('submit', handleGift);
+        }
+
+        function switchSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show target section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+            // Update page title
+            const titles = {
+                'overview': 'Dashboard Overview',
+                'users': 'User Management',
+                'payments': 'Payment Approval',
+                'contests-daily': 'Daily Contests',
+                'contests-weekly': 'Weekly Contests',
+                'contests-monthly': 'Monthly Contests',
+                'vip': 'VIP Management',
+                'notifications': 'Notifications',
+                'analytics': 'Analytics',
+                'system': 'System Control',
+                'settings': 'Settings'
+            };
+            document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
+
+            currentSection = sectionId;
+
+            // Load section-specific data
+            loadSectionData(sectionId);
+        }
+
+        function toggleSubmenu(targetId) {
+            const submenu = document.getElementById(targetId);
+            submenu.classList.toggle('expanded');
+        }
+
+        function loadSectionData(sectionId) {
+            switch(sectionId) {
+                case 'overview':
+                    loadOverviewData();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'payments':
+                    loadPendingPayments();
+                    break;
+                // Add other cases as needed
+            }
+        }
+
+        async function loadOverviewData() {
+            try {
+                const response = await fetch('/api/stats/overview', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateOverviewStats(data);
+                }
+            } catch (error) {
+                console.error('Error loading overview data:', error);
+            }
+        }
+
+        function updateOverviewStats(data) {
+            document.getElementById('totalUsers').textContent = data.users.total;
+            document.getElementById('newUsersToday').textContent = data.users.new_today;
+            document.getElementById('totalRevenue').textContent = `$${data.revenue.total}`;
+            document.getElementById('activeFarmers').textContent = data.game.active_farmers;
+            document.getElementById('cropsPlanted').textContent = data.game.crops_planted;
+            document.getElementById('vipSubscribers').textContent = data.vip.active_subscriptions;
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    populateUsersTable(data.users);
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function populateUsersTable(users) {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${user.telegram_id}</td>
+                    <td>${user.first_name || user.username || 'Unknown'}</td>
+                    <td>${user.sbr_coins || 0}</td>
+                    <td><i class="fas fa-tint water-drop"></i> ${user.water_drops || 0}</td>
+                    <td>${user.total_patches_unlocked || 3}</td>
+                    <td>${user.vip_tier ? `<span class="badge badge-vip">Tier ${user.vip_tier}</span>` : '-'}</td>
+                    <td><span class="badge ${user.is_banned ? 'badge-danger' : 'badge-success'}">${user.is_banned ? 'Banned' : 'Active'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewUser(${user.telegram_id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm ${user.is_banned ? 'btn-success' : 'btn-danger'}" onclick="${user.is_banned ? 'unbanUser' : 'banUser'}(${user.telegram_id})">
+                            <i class="fas fa-${user.is_banned ? 'unlock' : 'ban'}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="giftToUser(${user.telegram_id})">
+                            <i class="fas fa-gift"></i>
+                        </button>
+                    </td>
+                `;
+            });
+        }
+
+        async function loadPendingPayments() {
+            try {
+                const response = await fetch('/api/payments/pending', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    populatePendingPayments(data);
+                }
+            } catch (error) {
+                console.error('Error loading pending payments:', error);
+            }
+        }
+
+        function populatePendingPayments(data) {
+            // Populate withdrawals table
+            const withdrawalsTable = document.getElementById('pendingWithdrawalsTable');
+            withdrawalsTable.innerHTML = '';
+            document.getElementById('pendingWithdrawalsCount').textContent = data.withdrawals.length;
+
+            data.withdrawals.forEach(withdrawal => {
+                const row = withdrawalsTable.insertRow();
+                row.innerHTML = `
+                    <td>${withdrawal.first_name || withdrawal.username}</td>
+                    <td>${withdrawal.amount}</td>
+                    <td>${withdrawal.currency}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${withdrawal.wallet_address}</td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="approvePayment(${withdrawal.id}, 'withdrawal')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="rejectPayment(${withdrawal.id}, 'withdrawal')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </td>
+                `;
+            });
+
+            // Populate VIP purchases table
+            const vipTable = document.getElementById('pendingVIPTable');
+            vipTable.innerHTML = '';
+            document.getElementById('pendingVIPCount').textContent = data.vip_purchases.length;
+
+            data.vip_purchases.forEach(purchase => {
+                const row = vipTable.insertRow();
+                const tier = purchase.description.match(/Tier (\d+)/)?.[1] || '1';
+                row.innerHTML = `
+                    <td>${purchase.first_name || purchase.username}</td>
+                    <td><span class="badge badge-vip">Tier ${tier}</span></td>
+                    <td>$${purchase.amount}</td>
+                    <td>${purchase.wallet_address || purchase.transaction_hash || 'Pending'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="approvePayment(${purchase.id}, 'vip_purchase')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="rejectPayment(${purchase.id}, 'vip_purchase')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </td>
+                `;
+            });
+        }
+
+        // Payment approval functions
+        async function approvePayment(paymentId, type) {
+            if (!confirm('Are you sure you want to approve this payment?')) return;
+
+            try {
+                const response = await fetch(`/api/payments/${paymentId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type, notes: 'Approved by admin' })
+                });
+
+                if (response.ok) {
+                    showAlert('Payment approved successfully!', 'success');
+                    loadPendingPayments(); // Reload the data
+                } else {
+                    throw new Error('Failed to approve payment');
+                }
+            } catch (error) {
+                showAlert('Error approving payment: ' + error.message, 'danger');
+            }
+        }
+
+        async function rejectPayment(paymentId, type) {
+            const reason = prompt('Enter rejection reason:');
+            if (!reason) return;
+
+            try {
+                const response = await fetch(`/api/payments/${paymentId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type, reason })
+                });
+
+                if (response.ok) {
+                    showAlert('Payment rejected successfully!', 'success');
+                    loadPendingPayments(); // Reload the data
+                } else {
+                    throw new Error('Failed to reject payment');
+                }
+            } catch (error) {
+                showAlert('Error rejecting payment: ' + error.message, 'danger');
+            }
+        }
+
+        // Modal functions
+        function showBroadcastModal() {
+            document.getElementById('broadcastModal').classList.add('active');
+        }
+
+        function closeBroadcastModal() {
+            document.getElementById('broadcastModal').classList.remove('active');
+            document.getElementById('broadcastForm').reset();
+        }
+
+        function showGiftModal() {
+            document.getElementById('giftModal').classList.add('active');
+        }
+
+        function closeGiftModal() {
+            document.getElementById('giftModal').classList.remove('active');
+            document.getElementById('giftForm').reset();
+        }
+
+        function giftToUser(userId) {
+            document.getElementById('giftUserId').value = userId;
+            showGiftModal();
+        }
+
+        // Form handlers
+        async function handleBroadcast(e) {
+            e.preventDefault();
+            
+            const target = document.getElementById('broadcastTarget').value;
+            const message = document.getElementById('broadcastMessage').value;
+
+            if (!message.trim()) {
+                showAlert('Please enter a message', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/notifications/broadcast', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message, target_group: target })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAlert(`Broadcast sent to ${data.count} users!`, 'success');
+                    closeBroadcastModal();
+                } else {
+                    throw new Error('Failed to send broadcast');
+                }
+            } catch (error) {
+                showAlert('Error sending broadcast: ' + error.message, 'danger');
+            }
+        }
+
+        async function handleGift(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('giftUserId').value;
+            const type = document.getElementById('giftType').value;
+            const amount = document.getElementById('giftAmount').value;
+            const message = document.getElementById('giftMessage').value;
+
+            if (!userId || !amount) {
+                showAlert('Please fill in all required fields', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${userId}/gift`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type, amount: parseInt(amount), message })
+                });
+
+                if (response.ok) {
+                    showAlert('Gift sent successfully!', 'success');
+                    closeGiftModal();
+                } else {
+                    throw new Error('Failed to send gift');
+                }
+            } catch (error) {
+                showAlert('Error sending gift: ' + error.message, 'danger');
+            }
+        }
+
+        // Utility functions
+        function showAlert(message, type) {
+            const alertsContainer = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.textContent = message;
+            
+            alertsContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function refreshData() {
+            loadSectionData(currentSection);
+            showAlert('Data refreshed!', 'success');
+        }
+
+        async function createBackup() {
+            try {
+                const response = await fetch('/api/system/backup', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert('Database backup created successfully!', 'success');
+                } else {
+                    throw new Error('Failed to create backup');
+                }
+            } catch (error) {
+                showAlert('Error creating backup: ' + error.message, 'danger');
+            }
+        }
+
+        function initializeCharts() {
+            // User Growth Chart
+            const userGrowthCtx = document.getElementById('userGrowthChart')?.getContext('2d');
+            if (userGrowthCtx) {
+                new Chart(userGrowthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'New Users',
+                            data: [12, 19, 3, 5, 2, 3, 10],
+                            borderColor: 'rgb(45, 90, 39)',
+                            backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart')?.getContext('2d');
+            if (revenueCtx) {
+                new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Revenue ($)',
+                            data: [150, 200, 100, 250, 180, 300, 220],
+                            backgroundColor: 'rgba(139, 195, 74, 0.8)',
+                            borderColor: 'rgb(139, 195, 74)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            if (currentSection === 'overview') {
+                loadOverviewData();
+            } else if (currentSection === 'payments') {
+                loadPendingPayments();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

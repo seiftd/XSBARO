@@ -1,0 +1,53 @@
+{
+  "name": "sbrfarm-telegram-game",
+  "version": "1.0.0",
+  "description": "Telegram-based farming simulation game with crop cultivation, resource management, and VIP system",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "admin": "node src/admin/server.js",
+    "cron": "node src/cron/scheduler.js",
+    "test": "jest",
+    "init-db": "node src/database/init.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.15.6",
+    "node-cron": "^3.0.3",
+    "sqlite3": "^5.1.6",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "axios": "^1.6.2",
+    "multer": "^1.4.5-lts.1",
+    "dotenv": "^16.3.1",
+    "moment": "^2.29.4",
+    "uuid": "^9.0.1",
+    "chart.js": "^4.4.0",
+    "socket.io": "^4.7.4",
+    "nodemailer": "^6.9.7",
+    "crypto-js": "^4.2.0",
+    "qrcode": "^1.5.3",
+    "compression": "^1.7.4",
+    "firebase": "^10.7.1",
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "farming",
+    "game",
+    "simulation",
+    "cryptocurrency",
+    "nodejs"
+  ],
+  "author": "SBRFARM Team",
+  "license": "MIT"
+}
