@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 SBRFARM - Telegram Farming Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .navigation {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-item.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .nav-item:hover {
+            background: #e8f5e8;
+        }
+
+        .nav-item.active:hover {
+            background: #45a049;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Farm Section */
+        .farm-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .patch {
+            aspect-ratio: 1;
+            border: 3px solid #8D6E63;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #8D6E63, #A1887F);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .patch:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .patch.planted {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+
+        .patch.ready {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        .crop-icon {
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .timer {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #4CAF50;
+            transition: width 1s ease;
+        }
+
+        /* Shop Section */
+        .shop-items {
+            display: grid;
+            gap: 15px;
+        }
+
+        .shop-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-icon {
+            font-size: 2rem;
+        }
+
+        .item-details h3 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .item-details p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* VIP Section */
+        .vip-tiers {
+            display: grid;
+            gap: 15px;
+        }
+
+        .vip-tier {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vip-tier::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .vip-tier h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .vip-benefits {
+            margin: 10px 0;
+        }
+
+        .vip-benefits li {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .vip-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Contests Section */
+        .contest-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .contest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .contest-title {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .contest-time {
+            background: #FF9800;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Profile Section */
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 300px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        .notification.warning {
+            background: #ff9800;
+        }
+
+        /* Particle Effects */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 999;
+            font-size: 1.5rem;
+        }
+
+        .coin-particle {
+            color: #FFD700;
+            animation: coinFloat 2s ease-out forwards;
+        }
+
+        @keyframes coinFloat {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .water-particle {
+            color: #2196F3;
+            animation: waterSplash 1s ease-out forwards;
+        }
+
+        @keyframes waterSplash {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: white;
+        }
+
+        .loading-icon {
+            font-size: 4rem;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .farm-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-icon">🌾</div>
+        <div class="loading-text">Loading SBRFARM...</div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌾 SBRFARM</h1>
+            <p>Telegram Farming Simulation</p>
+            <div class="user-stats">
+                <div class="stat">
+                    <i class="fas fa-coins"></i>
+                    <span id="sbrCoins">0</span> SBR
+                </div>
+                <div class="stat">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span id="usdtBalance">0</span> USDT
+                </div>
+                <div class="stat">
+                    <i class="fas fa-tint"></i>
+                    <span id="waterDrops">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-item active" onclick="showSection('farm')">
+                <i class="fas fa-seedling"></i><br>Farm
+            </button>
+            <button class="nav-item" onclick="showSection('shop')">
+                <i class="fas fa-store"></i><br>Shop
+            </button>
+            <button class="nav-item" onclick="showSection('vip')">
+                <i class="fas fa-crown"></i><br>VIP
+            </button>
+            <button class="nav-item" onclick="showSection('contests')">
+                <i class="fas fa-trophy"></i><br>Contests
+            </button>
+            <button class="nav-item" onclick="showSection('profile')">
+                <i class="fas fa-user"></i><br>Profile
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Farm Section -->
+            <div id="farm" class="section active">
+                <h2>🌱 Your Farm</h2>
+                <div class="farm-grid" id="farmGrid">
+                    <!-- Patches will be generated by JavaScript -->
+                </div>
+                <div class="farm-actions">
+                    <button class="action-btn" onclick="waterAllCrops()">
+                        <i class="fas fa-tint"></i> Water All
+                    </button>
+                    <button class="action-btn" onclick="harvestAll()">
+                        <i class="fas fa-hand-paper"></i> Harvest All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shop Section -->
+            <div id="shop" class="section">
+                <h2>🛒 Seedling Shop</h2>
+                <div class="shop-items">
+                    <div class="shop-item" onclick="buySeedling('potato')">
+                        <div class="item-info">
+                            <div class="item-icon">🥔</div>
+                            <div class="item-details">
+                                <h3>Potato Seeds</h3>
+                                <p>Growth: 24 hours</p>
+                                <p>Water: 10 drops</p>
+                            </div>
+                        </div>
+                        <div class="item-price">50 SBR</div>
+                    </div>
+                    
+                    <div class="shop-item" onclick="buySeedling('tomato')">
+                        <div class="item-info">
+                            <div class="item-icon">🍅</div>
+                            <div class="item-details">
+                                <h3>Tomato Seeds</h3>
+                                <p>Growth: 48 hours</p>
+                                <p>Water: 20 drops</p>
+                            </div>
+                        </div>
+                        <div class="item-price">100 SBR</div>
+                    </div>
+                    
+                    <div class="shop-item" onclick="buySeedling('onion')">
+                        <div class="item-info">
+                            <div class="item-icon">🧅</div>
+                            <div class="item-details">
+                                <h3>Onion Seeds</h3>
+                                <p>Growth: 96 hours</p>
+                                <p>Water: 50 drops</p>
+                            </div>
+                        </div>
+                        <div class="item-price">1 USDT</div>
+                    </div>
+                    
+                    <div class="shop-item" onclick="buySeedling('carrot')">
+                        <div class="item-info">
+                            <div class="item-icon">🥕</div>
+                            <div class="item-details">
+                                <h3>Carrot Seeds</h3>
+                                <p>Growth: 144 hours</p>
+                                <p>Water: 1 heavy drop</p>
+                            </div>
+                        </div>
+                        <div class="item-price">5 USDT</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIP Section -->
+            <div id="vip" class="section">
+                <h2>👑 VIP Membership</h2>
+                <div class="vip-tiers">
+                    <div class="vip-tier">
+                        <h3>VIP Tier 1</h3>
+                        <ul class="vip-benefits">
+                            <li>+1 patch</li>
+                            <li>2 potato seedlings daily</li>
+                        </ul>
+                        <div class="vip-price">$7/month</div>
+                        <button class="action-btn" onclick="purchaseVIP(1)">Purchase</button>
+                    </div>
+                    
+                    <div class="vip-tier">
+                        <h3>VIP Tier 2</h3>
+                        <ul class="vip-benefits">
+                            <li>+1 patch, 5 patch parts</li>
+                            <li>2 potatoes, 10 water drops daily</li>
+                            <li>Tomato every 2 days</li>
+                        </ul>
+                        <div class="vip-price">$15/month</div>
+                        <button class="action-btn" onclick="purchaseVIP(2)">Purchase</button>
+                    </div>
+                    
+                    <div class="vip-tier">
+                        <h3>VIP Tier 3</h3>
+                        <ul class="vip-benefits">
+                            <li>+2 patches</li>
+                            <li>2 potatoes, 20 water drops daily</li>
+                            <li>Onion every 2 days</li>
+                        </ul>
+                        <div class="vip-price">$30/month</div>
+                        <button class="action-btn" onclick="purchaseVIP(3)">Purchase</button>
+                    </div>
+                    
+                    <div class="vip-tier">
+                        <h3>VIP Tier 4</h3>
+                        <ul class="vip-benefits">
+                            <li>+3 patches</li>
+                            <li>2 potatoes + 2 onions daily</li>
+                            <li>Carrot every 3 days</li>
+                        </ul>
+                        <div class="vip-price">$99/month</div>
+                        <button class="action-btn" onclick="purchaseVIP(4)">Purchase</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contests Section -->
+            <div id="contests" class="section">
+                <h2>🏆 Contests</h2>
+                
+                <div class="contest-item">
+                    <div class="contest-header">
+                        <div class="contest-title">Daily Contest</div>
+                        <div class="contest-time">23:30 UTC</div>
+                    </div>
+                    <p>Entry: 20 SBRcoin + 5 ads</p>
+                    <p>Prize: Random SBRcoin/Water</p>
+                    <button class="action-btn" onclick="joinContest('daily')">Join Contest</button>
+                </div>
+                
+                <div class="contest-item">
+                    <div class="contest-header">
+                        <div class="contest-title">Weekly Contest</div>
+                        <div class="contest-time">Mondays 23:30 UTC</div>
+                    </div>
+                    <p>Entry: 100 SBRcoin + 30 ads</p>
+                    <p>Prize: Random SBRcoin/Water</p>
+                    <button class="action-btn" onclick="joinContest('weekly')">Join Contest</button>
+                </div>
+                
+                <div class="contest-item">
+                    <div class="contest-header">
+                        <div class="contest-title">Monthly Contest</div>
+                        <div class="contest-time">Month-end 23:30 UTC</div>
+                    </div>
+                    <p>Entry: 200 SBRcoin + 100 ads</p>
+                    <p>Prize: VIP Tier 1 (3 winners)</p>
+                    <button class="action-btn" onclick="joinContest('monthly')">Join Contest</button>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="section">
+                <div class="profile-card">
+                    <div class="profile-avatar">👤</div>
+                    <h3>Farmer</h3>
+                    <p>Level 1 • Started Today</p>
+                </div>
+                
+                <div class="profile-stats">
+                    <h3>Statistics</h3>
+                    <p>Patches Owned: <span id="patchCount">3</span></p>
+                    <p>Crops Harvested: <span id="harvestCount">0</span></p>
+                    <p>Total Earnings: <span id="totalEarnings">0</span> SBR</p>
+                </div>
+                
+                <div class="profile-actions">
+                    <button class="action-btn" onclick="claimDailyReward()">
+                        <i class="fas fa-gift"></i> Daily Reward
+                    </button>
+                    <button class="action-btn" onclick="watchAd()">
+                        <i class="fas fa-video"></i> Watch Ad (+1 Water)
+                    </button>
+                    <button class="action-btn" onclick="showReferral()">
+                        <i class="fas fa-share"></i> Refer Friends
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plant Modal -->
+    <div class="modal" id="plantModal">
+        <div class="modal-content">
+            <h3 class="modal-title">🌱 Plant Crop</h3>
+            <p>Choose what to plant:</p>
+            <div class="modal-buttons">
+                <button class="action-btn" onclick="plantCrop('potato')">🥔 Potato</button>
+                <button class="action-btn" onclick="plantCrop('tomato')">🍅 Tomato</button>
+                <button class="action-btn" onclick="plantCrop('onion')">🧅 Onion</button>
+                <button class="action-btn" onclick="plantCrop('carrot')">🥕 Carrot</button>
+            </div>
+            <button class="action-btn" onclick="closeModal()" style="background: #f44336; margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Game State
+        let gameState = {
+            sbrCoins: 0,
+            usdtBalance: 0,
+            waterDrops: 10,
+            patches: [],
+            inventory: {
+                potato: 1,
+                tomato: 0,
+                onion: 0,
+                carrot: 0
+            },
+            stats: {
+                harvestCount: 0,
+                totalEarnings: 0
+            },
+            lastDailyReward: null,
+            lastAdWatch: null
+        };
+
+        // Crop Data
+        const cropData = {
+            potato: {
+                icon: '🥔',
+                growthTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+                waterRequired: 10,
+                price: 50,
+                sellValue: 100,
+                currency: 'SBR'
+            },
+            tomato: {
+                icon: '🍅',
+                growthTime: 48 * 60 * 60 * 1000, // 48 hours
+                waterRequired: 20,
+                price: 100,
+                sellValue: 150,
+                currency: 'SBR'
+            },
+            onion: {
+                icon: '🧅',
+                growthTime: 96 * 60 * 60 * 1000, // 96 hours
+                waterRequired: 50,
+                price: 1,
+                sellValue: 250,
+                currency: 'USDT'
+            },
+            carrot: {
+                icon: '🥕',
+                growthTime: 144 * 60 * 60 * 1000, // 144 hours
+                waterRequired: 1, // 1 heavy drop
+                price: 5,
+                sellValue: 1300,
+                currency: 'USDT'
+            }
+        };
+
+        let selectedPatch = null;
+
+        // Initialize Game
+        function initGame() {
+            // Initialize 3 patches
+            for (let i = 0; i < 3; i++) {
+                gameState.patches.push({
+                    id: i,
+                    crop: null,
+                    plantTime: null,
+                    watered: false
+                });
+            }
+            
+            loadGameState();
+            updateUI();
+            generateFarmGrid();
+            startGameLoop();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+        }
+
+        // Sound Effects
+        function playSound(type) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                function createTone(frequency, duration, volume = 0.1) {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+                }
+
+                switch(type) {
+                    case 'plant':
+                        createTone(440, 0.3);
+                        setTimeout(() => createTone(550, 0.2), 100);
+                        break;
+                    case 'harvest':
+                        createTone(660, 0.3);
+                        setTimeout(() => createTone(880, 0.3), 150);
+                        break;
+                    case 'coin':
+                        createTone(800, 0.2);
+                        break;
+                    case 'water':
+                        createTone(300, 0.4);
+                        break;
+                    case 'error':
+                        createTone(200, 0.5);
+                        break;
+                    case 'success':
+                        createTone(523, 0.2);
+                        setTimeout(() => createTone(659, 0.2), 100);
+                        setTimeout(() => createTone(784, 0.3), 200);
+                        break;
+                }
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Particle Effects
+        function createParticle(x, y, type, text) {
+            const particle = document.createElement('div');
+            particle.className = `particle ${type}-particle`;
+            particle.textContent = text;
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 2000);
+        }
+
+        // Generate Farm Grid
+        function generateFarmGrid() {
+            const farmGrid = document.getElementById('farmGrid');
+            farmGrid.innerHTML = '';
+            
+            gameState.patches.forEach((patch, index) => {
+                const patchElement = document.createElement('div');
+                patchElement.className = 'patch';
+                patchElement.onclick = () => clickPatch(index);
+                
+                if (patch.crop) {
+                    patchElement.classList.add('planted');
+                    const cropIcon = document.createElement('div');
+                    cropIcon.className = 'crop-icon';
+                    cropIcon.textContent = cropData[patch.crop].icon;
+                    patchElement.appendChild(cropIcon);
+                    
+                    // Add timer and progress
+                    const timer = document.createElement('div');
+                    timer.className = 'timer';
+                    timer.id = `timer-${index}`;
+                    patchElement.appendChild(timer);
+                    
+                    const progress = document.createElement('div');
+                    progress.className = 'progress-bar';
+                    progress.id = `progress-${index}`;
+                    patchElement.appendChild(progress);
+                    
+                    updatePatchProgress(index);
+                } else {
+                    patchElement.innerHTML = '<i class="fas fa-plus" style="font-size: 2rem; color: rgba(255,255,255,0.5);"></i>';
+                }
+                
+                farmGrid.appendChild(patchElement);
+            });
+        }
+
+        // Update patch progress
+        function updatePatchProgress(patchIndex) {
+            const patch = gameState.patches[patchIndex];
+            if (!patch.crop || !patch.plantTime) return;
+            
+            const now = Date.now();
+            const elapsed = now - patch.plantTime;
+            const growthTime = cropData[patch.crop].growthTime;
+            const progress = Math.min(elapsed / growthTime, 1);
+            
+            const timerElement = document.getElementById(`timer-${patchIndex}`);
+            const progressElement = document.getElementById(`progress-${patchIndex}`);
+            
+            if (progress >= 1) {
+                timerElement.textContent = 'Ready!';
+                progressElement.style.width = '100%';
+                const patchElement = progressElement.parentElement;
+                patchElement.classList.add('ready');
+            } else {
+                const remaining = growthTime - elapsed;
+                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                timerElement.textContent = `${hours}h ${minutes}m`;
+                progressElement.style.width = (progress * 100) + '%';
+            }
+        }
+
+        // Click patch
+        function clickPatch(index) {
+            const patch = gameState.patches[index];
+            selectedPatch = index;
+            
+            if (!patch.crop) {
+                // Show plant modal
+                document.getElementById('plantModal').classList.add('active');
+            } else {
+                // Check if ready to harvest
+                const now = Date.now();
+                const elapsed = now - patch.plantTime;
+                const growthTime = cropData[patch.crop].growthTime;
+                
+                if (elapsed >= growthTime) {
+                    harvestCrop(index);
+                } else if (!patch.watered) {
+                    waterCrop(index);
+                } else {
+                    showNotification('Crop is already watered and growing!', 'warning');
+                }
+            }
+        }
+
+        // Plant crop
+        function plantCrop(cropType) {
+            if (gameState.inventory[cropType] <= 0) {
+                showNotification('You don\'t have any ' + cropType + ' seeds!', 'error');
+                playSound('error');
+                return;
+            }
+            
+            const patch = gameState.patches[selectedPatch];
+            patch.crop = cropType;
+            patch.plantTime = Date.now();
+            patch.watered = false;
+            
+            gameState.inventory[cropType]--;
+            
+            closeModal();
+            generateFarmGrid();
+            updateUI();
+            
+            // Effects
+            playSound('plant');
+            const patchElement = document.querySelectorAll('.patch')[selectedPatch];
+            const rect = patchElement.getBoundingClientRect();
+            createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'water', '🌱');
+            
+            showNotification(`Planted ${cropType}!`, 'success');
+            saveGameState();
+        }
+
+        // Water crop
+        function waterCrop(patchIndex) {
+            const patch = gameState.patches[patchIndex];
+            if (!patch.crop || patch.watered) return;
+            
+            const waterRequired = cropData[patch.crop].waterRequired;
+            
+            if (gameState.waterDrops < waterRequired) {
+                showNotification(`Need ${waterRequired} water drops!`, 'error');
+                playSound('error');
+                return;
+            }
+            
+            gameState.waterDrops -= waterRequired;
+            patch.watered = true;
+            
+            updateUI();
+            
+            // Effects
+            playSound('water');
+            const patchElement = document.querySelectorAll('.patch')[patchIndex];
+            const rect = patchElement.getBoundingClientRect();
+            createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'water', '💧');
+            
+            showNotification('Crop watered!', 'success');
+            saveGameState();
+        }
+
+        // Harvest crop
+        function harvestCrop(patchIndex) {
+            const patch = gameState.patches[patchIndex];
+            if (!patch.crop) return;
+            
+            const cropType = patch.crop;
+            const sellValue = cropData[cropType].sellValue;
+            
+            if (cropData[cropType].currency === 'SBR') {
+                gameState.sbrCoins += sellValue;
+            } else {
+                gameState.usdtBalance += sellValue;
+            }
+            
+            gameState.stats.harvestCount++;
+            gameState.stats.totalEarnings += sellValue;
+            
+            // Reset patch
+            patch.crop = null;
+            patch.plantTime = null;
+            patch.watered = false;
+            
+            generateFarmGrid();
+            updateUI();
+            
+            // Effects
+            playSound('harvest');
+            playSound('coin');
+            const patchElement = document.querySelectorAll('.patch')[patchIndex];
+            const rect = patchElement.getBoundingClientRect();
+            createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'coin', '💰');
+            
+            showNotification(`Harvested ${cropType} for ${sellValue} ${cropData[cropType].currency}!`, 'success');
+            saveGameState();
+        }
+
+        // Water all crops
+        function waterAllCrops() {
+            let watered = 0;
+            let totalWaterNeeded = 0;
+            
+            gameState.patches.forEach(patch => {
+                if (patch.crop && !patch.watered) {
+                    totalWaterNeeded += cropData[patch.crop].waterRequired;
+                }
+            });
+            
+            if (gameState.waterDrops < totalWaterNeeded) {
+                showNotification(`Need ${totalWaterNeeded} water drops total!`, 'error');
+                playSound('error');
+                return;
+            }
+            
+            gameState.patches.forEach((patch, index) => {
+                if (patch.crop && !patch.watered) {
+                    waterCrop(index);
+                    watered++;
+                }
+            });
+            
+            if (watered > 0) {
+                showNotification(`Watered ${watered} crops!`, 'success');
+            } else {
+                showNotification('No crops need watering!', 'warning');
+            }
+        }
+
+        // Harvest all ready crops
+        function harvestAll() {
+            let harvested = 0;
+            const now = Date.now();
+            
+            gameState.patches.forEach((patch, index) => {
+                if (patch.crop && patch.plantTime) {
+                    const elapsed = now - patch.plantTime;
+                    const growthTime = cropData[patch.crop].growthTime;
+                    
+                    if (elapsed >= growthTime) {
+                        harvestCrop(index);
+                        harvested++;
+                    }
+                }
+            });
+            
+            if (harvested > 0) {
+                showNotification(`Harvested ${harvested} crops!`, 'success');
+            } else {
+                showNotification('No crops ready to harvest!', 'warning');
+            }
+        }
+
+        // Buy seedling
+        function buySeedling(cropType) {
+            const price = cropData[cropType].price;
+            const currency = cropData[cropType].currency;
+            
+            if (currency === 'SBR' && gameState.sbrCoins < price) {
+                showNotification(`Need ${price} SBRcoins!`, 'error');
+                playSound('error');
+                return;
+            } else if (currency === 'USDT' && gameState.usdtBalance < price) {
+                showNotification(`Need ${price} USDT!`, 'error');
+                playSound('error');
+                return;
+            }
+            
+            if (currency === 'SBR') {
+                gameState.sbrCoins -= price;
+            } else {
+                gameState.usdtBalance -= price;
+            }
+            
+            gameState.inventory[cropType]++;
+            
+            updateUI();
+            playSound('success');
+            showNotification(`Purchased ${cropType} seeds!`, 'success');
+            saveGameState();
+        }
+
+        // Purchase VIP
+        function purchaseVIP(tier) {
+            const prices = [7, 15, 30, 99];
+            const price = prices[tier - 1];
+            
+            showNotification(`Redirecting to payment for VIP Tier ${tier} ($${price})...`, 'success');
+            
+            // In a real implementation, this would integrate with the Telegram bot
+            // and handle the payment process through the admin dashboard
+        }
+
+        // Join contest
+        function joinContest(type) {
+            const entries = { daily: 20, weekly: 100, monthly: 200 };
+            const entry = entries[type];
+            
+            if (gameState.sbrCoins < entry) {
+                showNotification(`Need ${entry} SBRcoins to enter!`, 'error');
+                playSound('error');
+                return;
+            }
+            
+            gameState.sbrCoins -= entry;
+            updateUI();
+            
+            showNotification(`Joined ${type} contest!`, 'success');
+            playSound('success');
+            saveGameState();
+        }
+
+        // Claim daily reward
+        function claimDailyReward() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            if (gameState.lastDailyReward === today) {
+                showNotification('Daily reward already claimed!', 'warning');
+                return;
+            }
+            
+            gameState.waterDrops = Math.min(gameState.waterDrops + 10, 100);
+            gameState.lastDailyReward = today;
+            
+            updateUI();
+            playSound('success');
+            showNotification('Claimed 10 water drops!', 'success');
+            saveGameState();
+        }
+
+        // Watch ad
+        function watchAd() {
+            const now = Date.now();
+            if (gameState.lastAdWatch && (now - gameState.lastAdWatch) < 60000) {
+                showNotification('Wait 1 minute between ads!', 'warning');
+                return;
+            }
+            
+            gameState.waterDrops = Math.min(gameState.waterDrops + 1, 100);
+            gameState.lastAdWatch = now;
+            
+            updateUI();
+            playSound('success');
+            showNotification('Watched ad! +1 water drop', 'success');
+            saveGameState();
+        }
+
+        // Show referral
+        function showReferral() {
+            showNotification('Referral system coming soon!', 'warning');
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked nav item
+            event.target.classList.add('active');
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('sbrCoins').textContent = gameState.sbrCoins;
+            document.getElementById('usdtBalance').textContent = gameState.usdtBalance.toFixed(2);
+            document.getElementById('waterDrops').textContent = gameState.waterDrops;
+            document.getElementById('patchCount').textContent = gameState.patches.length;
+            document.getElementById('harvestCount').textContent = gameState.stats.harvestCount;
+            document.getElementById('totalEarnings').textContent = gameState.stats.totalEarnings;
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        // Game loop
+        function startGameLoop() {
+            setInterval(() => {
+                gameState.patches.forEach((patch, index) => {
+                    if (patch.crop && patch.plantTime) {
+                        updatePatchProgress(index);
+                    }
+                });
+            }, 60000); // Update every minute
+        }
+
+        // Save game state
+        function saveGameState() {
+            localStorage.setItem('sbrfarm-game', JSON.stringify(gameState));
+        }
+
+        // Load game state
+        function loadGameState() {
+            const saved = localStorage.getItem('sbrfarm-game');
+            if (saved) {
+                gameState = { ...gameState, ...JSON.parse(saved) };
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initGame);
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
