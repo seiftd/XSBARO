@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌾 SBRFARM - Telegram Farming Game</title>
+    <title>🌾 SBRFARM - Ultimate Farming Experience</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,82 +14,136 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Comic Sans MS', cursive;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="200" cy="200" r="3" fill="%23fff" opacity="0.3"/><circle cx="400" cy="100" r="2" fill="%23fff" opacity="0.2"/><circle cx="600" cy="300" r="4" fill="%23fff" opacity="0.4"/><circle cx="800" cy="150" r="2" fill="%23fff" opacity="0.3"/></svg>');
+            animation: float 20s infinite linear;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
         }
 
         .container {
             max-width: 400px;
             margin: 0 auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             min-height: 100vh;
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
         }
 
         .header {
-            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            background: linear-gradient(45deg, #32CD32, #228B22, #006400);
             color: white;
             padding: 20px;
             text-align: center;
             position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '🌾🚜🌱🍯🐝🦋🌸🌻';
+            position: absolute;
+            top: 5px;
+            left: -100%;
+            animation: scroll 15s linear infinite;
+            font-size: 1.2rem;
+        }
+
+        @keyframes scroll {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .header h1 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .user-stats {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-top: 15px;
         }
 
         .stat {
-            display: flex;
-            align-items: center;
-            gap: 5px;
             background: rgba(255,255,255,0.2);
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .stat i {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
         }
 
         .navigation {
             display: flex;
-            background: #f5f5f5;
-            border-bottom: 1px solid #ddd;
+            background: #2E8B57;
+            border-bottom: 2px solid #228B22;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
         .nav-item {
             flex: 1;
-            padding: 15px 10px;
+            padding: 15px 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             border: none;
             background: none;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            color: white;
+            font-weight: bold;
         }
 
         .nav-item.active {
-            background: #4CAF50;
-            color: white;
+            background: #32CD32;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .nav-item:hover {
-            background: #e8f5e8;
+            background: #3CB371;
+            transform: translateY(-1px);
         }
 
-        .nav-item.active:hover {
-            background: #45a049;
+        .nav-item i {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
         }
 
         .content {
             padding: 20px;
+            background: linear-gradient(135deg, #F0FFF0 0%, #E6FFE6 100%);
+            min-height: calc(100vh - 200px);
         }
 
         .section {
@@ -97,81 +152,153 @@
 
         .section.active {
             display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Farm Section */
+        .farm-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(45deg, #90EE90, #98FB98);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .farm-header h2 {
+            color: #006400;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
         .farm-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 15px;
+            border: 2px dashed #32CD32;
         }
 
         .patch {
             aspect-ratio: 1;
-            border: 3px solid #8D6E63;
-            border-radius: 15px;
-            background: linear-gradient(45deg, #8D6E63, #A1887F);
+            border: 3px solid #8B4513;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #DEB887, #D2B48C);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .patch:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
         .patch.planted {
-            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            background: linear-gradient(45deg, #228B22, #32CD32);
+            border-color: #006400;
         }
 
         .patch.ready {
             background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-color: #FF8C00;
             animation: glow 2s infinite;
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+                transform: scale(1.02);
+            }
         }
 
         .crop-icon {
-            font-size: 2rem;
-            animation: bounce 2s infinite;
+            font-size: 2.5rem;
+            animation: bounce 3s infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-8px); }
         }
 
         .timer {
             position: absolute;
             bottom: 5px;
-            right: 5px;
-            background: rgba(0,0,0,0.7);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 2px 6px;
-            border-radius: 10px;
+            padding: 3px 8px;
+            border-radius: 15px;
             font-size: 0.7rem;
+            font-weight: bold;
         }
 
         .progress-bar {
             position: absolute;
             bottom: 0;
             left: 0;
-            height: 4px;
-            background: #4CAF50;
+            height: 6px;
+            background: linear-gradient(90deg, #32CD32, #98FB98);
             transition: width 1s ease;
+            border-radius: 0 0 17px 17px;
+        }
+
+        .farm-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
         }
 
         /* Shop Section */
+        .shop-categories {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .category-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(45deg, #32CD32, #98FB98);
+            color: white;
+            transform: scale(1.05);
+        }
+
         .shop-items {
             display: grid;
             gap: 15px;
@@ -179,7 +306,7 @@
 
         .shop-item {
             background: white;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #90EE90;
             border-radius: 15px;
             padding: 15px;
             display: flex;
@@ -187,148 +314,168 @@
             justify-content: space-between;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .shop-item:hover {
-            border-color: #4CAF50;
-            transform: translateY(-2px);
+            border-color: #32CD32;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
         .item-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .item-icon {
-            font-size: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .item-details h3 {
             margin-bottom: 5px;
-            color: #333;
+            color: #006400;
+            font-size: 1.1rem;
         }
 
         .item-details p {
-            color: #666;
+            color: #228B22;
             font-size: 0.9rem;
+            margin: 2px 0;
         }
 
         .item-price {
-            background: #4CAF50;
+            background: linear-gradient(45deg, #32CD32, #98FB98);
             color: white;
-            padding: 8px 15px;
+            padding: 10px 15px;
             border-radius: 20px;
             font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* VIP Section */
-        .vip-tiers {
-            display: grid;
-            gap: 15px;
-        }
-
-        .vip-tier {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            border-radius: 15px;
-            padding: 20px;
+        /* Wallet Section */
+        .wallet-card {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
             color: white;
-            position: relative;
-            overflow: hidden;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
-        .vip-tier::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-
-        .vip-tier h3 {
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
-
-        .vip-benefits {
-            margin: 10px 0;
-        }
-
-        .vip-benefits li {
-            margin: 5px 0;
-            font-size: 0.9rem;
-        }
-
-        .vip-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        /* Contests Section */
-        .contest-item {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .contest-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .contest-title {
-            font-size: 1.2rem;
-            color: #333;
-        }
-
-        .contest-time {
-            background: #FF9800;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-
-        /* Profile Section */
-        .profile-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
+        .wallet-header {
             text-align: center;
             margin-bottom: 20px;
         }
 
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #4CAF50, #8BC34A);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
+        .wallet-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .balance-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .wallet-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* Bag Section */
+        .bag-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .bag-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #90EE90;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .bag-item i {
             font-size: 2rem;
+            margin-bottom: 10px;
+            color: #32CD32;
+        }
+
+        .bag-item h3 {
+            color: #006400;
+            margin-bottom: 5px;
+        }
+
+        .bag-item .quantity {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #228B22;
+        }
+
+        /* Tasks Section */
+        .task-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid #32CD32;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-size: 1.2rem;
+            color: #006400;
+            font-weight: bold;
+        }
+
+        .task-reward {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
             color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .task-description {
+            color: #228B22;
+            margin-bottom: 15px;
         }
 
         /* Action Buttons */
         .action-btn {
-            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            background: linear-gradient(45deg, #32CD32, #98FB98);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -336,18 +483,35 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1rem;
+            font-weight: bold;
             margin: 5px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            box-shadow: 0 6px 20px rgba(50, 205, 50, 0.4);
         }
 
         .action-btn:active {
             transform: translateY(0);
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
         }
 
         /* Modal */
@@ -358,8 +522,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.8);
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .modal.active {
@@ -372,15 +537,22 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            max-width: 300px;
+            max-width: 350px;
             width: 90%;
             text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-50px) scale(0.8); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         .modal-title {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             margin-bottom: 20px;
-            color: #333;
+            color: #006400;
         }
 
         .modal-buttons {
@@ -395,13 +567,14 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #4CAF50;
+            background: linear-gradient(45deg, #32CD32, #98FB98);
             color: white;
             padding: 15px 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             transform: translateX(400px);
             transition: transform 0.3s ease;
             z-index: 1001;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
         .notification.show {
@@ -409,11 +582,11 @@
         }
 
         .notification.error {
-            background: #f44336;
+            background: linear-gradient(45deg, #f44336, #ff6b6b);
         }
 
         .notification.warning {
-            background: #ff9800;
+            background: linear-gradient(45deg, #ff9800, #ffb74d);
         }
 
         /* Particle Effects */
@@ -467,7 +640,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #87CEEB, #98FB98);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -477,7 +650,7 @@
         }
 
         .loading-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             animation: spin 2s linear infinite;
             margin-bottom: 20px;
         }
@@ -488,13 +661,59 @@
         }
 
         .loading-text {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             animation: pulse 2s infinite;
+            font-weight: bold;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #006400;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #90EE90;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #32CD32;
+            box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.1);
+        }
+
+        /* Sound Control */
+        .sound-control {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         /* Responsive */
@@ -510,21 +729,31 @@
             .modal-buttons {
                 grid-template-columns: 1fr;
             }
+
+            .user-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Sound Control -->
+    <button class="sound-control" id="soundToggle" onclick="toggleSound()">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
     <!-- Loading Screen -->
     <div class="loading" id="loading">
-        <div class="loading-icon">🌾</div>
+        <div class="loading-icon">🚜</div>
         <div class="loading-text">Loading SBRFARM...</div>
+        <p style="margin-top: 10px;">🌾 Preparing your farm... 🌾</p>
     </div>
 
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🌾 SBRFARM</h1>
-            <p>Telegram Farming Simulation</p>
+            <h1>🌾 SBRFARM 🚜</h1>
+            <p>🌟 Ultimate Farming Experience 🌟</p>
             <div class="user-stats">
                 <div class="stat">
                     <i class="fas fa-coins"></i>
@@ -532,11 +761,23 @@
                 </div>
                 <div class="stat">
                     <i class="fas fa-dollar-sign"></i>
-                    <span id="usdtBalance">0</span> USDT
+                    <span id="usdtBalance">0.00</span> USDT
                 </div>
                 <div class="stat">
                     <i class="fas fa-tint"></i>
-                    <span id="waterDrops">0</span>
+                    <span id="waterDrops">10</span> 💧
+                </div>
+                <div class="stat">
+                    <i class="fas fa-star"></i>
+                    Level <span id="playerLevel">1</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-fire"></i>
+                    <span id="boosters">0</span> ⚡
+                </div>
+                <div class="stat">
+                    <i class="fas fa-gem"></i>
+                    <span id="heavyWater">0</span> 💎
                 </div>
             </div>
         </div>
@@ -544,19 +785,28 @@
         <!-- Navigation -->
         <div class="navigation">
             <button class="nav-item active" onclick="showSection('farm')">
-                <i class="fas fa-seedling"></i><br>Farm
+                <i class="fas fa-seedling"></i>
+                Farm
             </button>
             <button class="nav-item" onclick="showSection('shop')">
-                <i class="fas fa-store"></i><br>Shop
+                <i class="fas fa-store"></i>
+                Shop
             </button>
-            <button class="nav-item" onclick="showSection('vip')">
-                <i class="fas fa-crown"></i><br>VIP
+            <button class="nav-item" onclick="showSection('bag')">
+                <i class="fas fa-shopping-bag"></i>
+                Bag
             </button>
-            <button class="nav-item" onclick="showSection('contests')">
-                <i class="fas fa-trophy"></i><br>Contests
+            <button class="nav-item" onclick="showSection('wallet')">
+                <i class="fas fa-wallet"></i>
+                Wallet
+            </button>
+            <button class="nav-item" onclick="showSection('tasks')">
+                <i class="fas fa-tasks"></i>
+                Tasks
             </button>
             <button class="nav-item" onclick="showSection('profile')">
-                <i class="fas fa-user"></i><br>Profile
+                <i class="fas fa-user"></i>
+                Profile
             </button>
         </div>
 
@@ -564,182 +814,178 @@
         <div class="content">
             <!-- Farm Section -->
             <div id="farm" class="section active">
-                <h2>🌱 Your Farm</h2>
+                <div class="farm-header">
+                    <h2>🌱 Your Beautiful Farm 🌱</h2>
+                    <p>Plant, Water, Harvest & Prosper! 🌾</p>
+                </div>
+                
                 <div class="farm-grid" id="farmGrid">
                     <!-- Patches will be generated by JavaScript -->
                 </div>
+                
                 <div class="farm-actions">
                     <button class="action-btn" onclick="waterAllCrops()">
-                        <i class="fas fa-tint"></i> Water All
+                        <i class="fas fa-tint"></i> Water All 💧
                     </button>
                     <button class="action-btn" onclick="harvestAll()">
-                        <i class="fas fa-hand-paper"></i> Harvest All
+                        <i class="fas fa-hand-paper"></i> Harvest All 🌾
+                    </button>
+                    <button class="action-btn" onclick="useBoosterAll()">
+                        <i class="fas fa-rocket"></i> Boost All ⚡
+                    </button>
+                    <button class="action-btn" onclick="expandFarm()">
+                        <i class="fas fa-plus"></i> Expand Farm 🏗️
                     </button>
                 </div>
             </div>
 
             <!-- Shop Section -->
             <div id="shop" class="section">
-                <h2>🛒 Seedling Shop</h2>
-                <div class="shop-items">
-                    <div class="shop-item" onclick="buySeedling('potato')">
-                        <div class="item-info">
-                            <div class="item-icon">🥔</div>
-                            <div class="item-details">
-                                <h3>Potato Seeds</h3>
-                                <p>Growth: 24 hours</p>
-                                <p>Water: 10 drops</p>
-                            </div>
-                        </div>
-                        <div class="item-price">50 SBR</div>
+                <div class="shop-categories">
+                    <button class="category-btn active" onclick="showShopCategory('buy')">
+                        <i class="fas fa-shopping-cart"></i> Buy
+                    </button>
+                    <button class="category-btn" onclick="showShopCategory('sell')">
+                        <i class="fas fa-coins"></i> Sell
+                    </button>
+                </div>
+
+                <!-- Buy Category -->
+                <div id="buy-category" class="shop-category active">
+                    <div class="shop-items" id="buyItems">
+                        <!-- Buy items will be generated by JavaScript -->
                     </div>
-                    
-                    <div class="shop-item" onclick="buySeedling('tomato')">
-                        <div class="item-info">
-                            <div class="item-icon">🍅</div>
-                            <div class="item-details">
-                                <h3>Tomato Seeds</h3>
-                                <p>Growth: 48 hours</p>
-                                <p>Water: 20 drops</p>
-                            </div>
-                        </div>
-                        <div class="item-price">100 SBR</div>
-                    </div>
-                    
-                    <div class="shop-item" onclick="buySeedling('onion')">
-                        <div class="item-info">
-                            <div class="item-icon">🧅</div>
-                            <div class="item-details">
-                                <h3>Onion Seeds</h3>
-                                <p>Growth: 96 hours</p>
-                                <p>Water: 50 drops</p>
-                            </div>
-                        </div>
-                        <div class="item-price">1 USDT</div>
-                    </div>
-                    
-                    <div class="shop-item" onclick="buySeedling('carrot')">
-                        <div class="item-info">
-                            <div class="item-icon">🥕</div>
-                            <div class="item-details">
-                                <h3>Carrot Seeds</h3>
-                                <p>Growth: 144 hours</p>
-                                <p>Water: 1 heavy drop</p>
-                            </div>
-                        </div>
-                        <div class="item-price">5 USDT</div>
+                </div>
+
+                <!-- Sell Category -->
+                <div id="sell-category" class="shop-category" style="display: none;">
+                    <div class="shop-items" id="sellItems">
+                        <!-- Sell items will be generated by JavaScript -->
                     </div>
                 </div>
             </div>
 
-            <!-- VIP Section -->
-            <div id="vip" class="section">
-                <h2>👑 VIP Membership</h2>
-                <div class="vip-tiers">
-                    <div class="vip-tier">
-                        <h3>VIP Tier 1</h3>
-                        <ul class="vip-benefits">
-                            <li>+1 patch</li>
-                            <li>2 potato seedlings daily</li>
-                        </ul>
-                        <div class="vip-price">$7/month</div>
-                        <button class="action-btn" onclick="purchaseVIP(1)">Purchase</button>
+            <!-- Bag Section -->
+            <div id="bag" class="section">
+                <h2 style="text-align: center; color: #006400; margin-bottom: 20px;">
+                    🎒 Your Farming Bag 🎒
+                </h2>
+                <div class="bag-grid" id="bagGrid">
+                    <!-- Bag items will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Wallet Section -->
+            <div id="wallet" class="section">
+                <div class="wallet-card">
+                    <div class="wallet-header">
+                        <h2>💳 Digital Wallet 💳</h2>
+                        <p>Manage your farming finances</p>
                     </div>
                     
-                    <div class="vip-tier">
-                        <h3>VIP Tier 2</h3>
-                        <ul class="vip-benefits">
-                            <li>+1 patch, 5 patch parts</li>
-                            <li>2 potatoes, 10 water drops daily</li>
-                            <li>Tomato every 2 days</li>
-                        </ul>
-                        <div class="vip-price">$15/month</div>
-                        <button class="action-btn" onclick="purchaseVIP(2)">Purchase</button>
+                    <div class="balance-grid">
+                        <div class="balance-item">
+                            <div class="balance-value" id="walletUSDT">0.00</div>
+                            <div>USDT Balance</div>
+                        </div>
+                        <div class="balance-item">
+                            <div class="balance-value" id="walletTON">0.00</div>
+                            <div>TON Balance</div>
+                        </div>
                     </div>
                     
-                    <div class="vip-tier">
-                        <h3>VIP Tier 3</h3>
-                        <ul class="vip-benefits">
-                            <li>+2 patches</li>
-                            <li>2 potatoes, 20 water drops daily</li>
-                            <li>Onion every 2 days</li>
-                        </ul>
-                        <div class="vip-price">$30/month</div>
-                        <button class="action-btn" onclick="purchaseVIP(3)">Purchase</button>
+                    <div class="wallet-actions">
+                        <button class="action-btn" onclick="showDeposit()">
+                            <i class="fas fa-plus"></i> Deposit
+                        </button>
+                        <button class="action-btn" onclick="showWithdraw()">
+                            <i class="fas fa-minus"></i> Withdraw
+                        </button>
+                        <button class="action-btn" onclick="buyVIPFromWallet()">
+                            <i class="fas fa-crown"></i> Buy VIP
+                        </button>
+                        <button class="action-btn" onclick="showConverter()">
+                            <i class="fas fa-exchange-alt"></i> Convert
+                        </button>
                     </div>
-                    
-                    <div class="vip-tier">
-                        <h3>VIP Tier 4</h3>
-                        <ul class="vip-benefits">
-                            <li>+3 patches</li>
-                            <li>2 potatoes + 2 onions daily</li>
-                            <li>Carrot every 3 days</li>
-                        </ul>
-                        <div class="vip-price">$99/month</div>
-                        <button class="action-btn" onclick="purchaseVIP(4)">Purchase</button>
+                </div>
+
+                <!-- Payment Methods -->
+                <div style="background: white; padding: 20px; border-radius: 15px; margin-top: 20px;">
+                    <h3 style="color: #006400; margin-bottom: 15px;">💰 Payment Methods</h3>
+                    <div class="form-group">
+                        <label>Binance Pay ID:</label>
+                        <p style="background: #f0f0f0; padding: 10px; border-radius: 8px;">713636914</p>
+                    </div>
+                    <div class="form-group">
+                        <label>TON Wallet:</label>
+                        <p style="background: #f0f0f0; padding: 10px; border-radius: 8px; word-break: break-all;">
+                            UQBVeJflae5yTTgS6wczgpDkDcyEAnmA88bZyaiB3lYGqWw9
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>TRC20 USDT:</label>
+                        <p style="background: #f0f0f0; padding: 10px; border-radius: 8px; word-break: break-all;">
+                            TLDsutnxpdLZaRxhGWBJismwsjY3WiTHWX
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Contests Section -->
-            <div id="contests" class="section">
-                <h2>🏆 Contests</h2>
-                
-                <div class="contest-item">
-                    <div class="contest-header">
-                        <div class="contest-title">Daily Contest</div>
-                        <div class="contest-time">23:30 UTC</div>
-                    </div>
-                    <p>Entry: 20 SBRcoin + 5 ads</p>
-                    <p>Prize: Random SBRcoin/Water</p>
-                    <button class="action-btn" onclick="joinContest('daily')">Join Contest</button>
-                </div>
-                
-                <div class="contest-item">
-                    <div class="contest-header">
-                        <div class="contest-title">Weekly Contest</div>
-                        <div class="contest-time">Mondays 23:30 UTC</div>
-                    </div>
-                    <p>Entry: 100 SBRcoin + 30 ads</p>
-                    <p>Prize: Random SBRcoin/Water</p>
-                    <button class="action-btn" onclick="joinContest('weekly')">Join Contest</button>
-                </div>
-                
-                <div class="contest-item">
-                    <div class="contest-header">
-                        <div class="contest-title">Monthly Contest</div>
-                        <div class="contest-time">Month-end 23:30 UTC</div>
-                    </div>
-                    <p>Entry: 200 SBRcoin + 100 ads</p>
-                    <p>Prize: VIP Tier 1 (3 winners)</p>
-                    <button class="action-btn" onclick="joinContest('monthly')">Join Contest</button>
+            <!-- Tasks Section -->
+            <div id="tasks" class="section">
+                <h2 style="text-align: center; color: #006400; margin-bottom: 20px;">
+                    📋 Daily Tasks 📋
+                </h2>
+                <div id="tasksList">
+                    <!-- Tasks will be generated by JavaScript -->
                 </div>
             </div>
 
             <!-- Profile Section -->
             <div id="profile" class="section">
-                <div class="profile-card">
-                    <div class="profile-avatar">👤</div>
-                    <h3>Farmer</h3>
-                    <p>Level 1 • Started Today</p>
+                <div style="background: white; padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(45deg, #32CD32, #98FB98); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 3rem;">
+                        👨‍🌾
+                    </div>
+                    <h3 style="color: #006400; margin-bottom: 10px;">Master Farmer</h3>
+                    <p style="color: #228B22;">Level <span id="profileLevel">1</span> • Farming since today</p>
                 </div>
                 
-                <div class="profile-stats">
-                    <h3>Statistics</h3>
-                    <p>Patches Owned: <span id="patchCount">3</span></p>
-                    <p>Crops Harvested: <span id="harvestCount">0</span></p>
-                    <p>Total Earnings: <span id="totalEarnings">0</span> SBR</p>
+                <div style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                    <h3 style="color: #006400; margin-bottom: 15px;">📊 Farm Statistics</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #32CD32;" id="profilePatches">3</div>
+                            <div style="color: #666;">Patches Owned</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #32CD32;" id="profileHarvests">0</div>
+                            <div style="color: #666;">Crops Harvested</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #32CD32;" id="profileEarnings">0</div>
+                            <div style="color: #666;">Total Earnings</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #32CD32;" id="profileVIP">None</div>
+                            <div style="color: #666;">VIP Status</div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="profile-actions">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                     <button class="action-btn" onclick="claimDailyReward()">
-                        <i class="fas fa-gift"></i> Daily Reward
+                        <i class="fas fa-gift"></i> Daily Reward 🎁
                     </button>
                     <button class="action-btn" onclick="watchAd()">
-                        <i class="fas fa-video"></i> Watch Ad (+1 Water)
+                        <i class="fas fa-video"></i> Watch Ad 📺
                     </button>
                     <button class="action-btn" onclick="showReferral()">
-                        <i class="fas fa-share"></i> Refer Friends
+                        <i class="fas fa-share"></i> Refer Friends 👥
+                    </button>
+                    <button class="action-btn" onclick="joinTelegramChannel()">
+                        <i class="fab fa-telegram"></i> Join Channel 📢
                     </button>
                 </div>
             </div>
@@ -749,15 +995,52 @@
     <!-- Plant Modal -->
     <div class="modal" id="plantModal">
         <div class="modal-content">
-            <h3 class="modal-title">🌱 Plant Crop</h3>
-            <p>Choose what to plant:</p>
-            <div class="modal-buttons">
-                <button class="action-btn" onclick="plantCrop('potato')">🥔 Potato</button>
-                <button class="action-btn" onclick="plantCrop('tomato')">🍅 Tomato</button>
-                <button class="action-btn" onclick="plantCrop('onion')">🧅 Onion</button>
-                <button class="action-btn" onclick="plantCrop('carrot')">🥕 Carrot</button>
+            <h3 class="modal-title">🌱 Choose Your Crop</h3>
+            <p style="margin-bottom: 20px;">Select what to plant in this patch:</p>
+            <div class="modal-buttons" id="plantOptions">
+                <!-- Plant options will be generated by JavaScript -->
             </div>
-            <button class="action-btn" onclick="closeModal()" style="background: #f44336; margin-top: 10px;">Cancel</button>
+            <button class="action-btn" onclick="closeModal()" style="background: linear-gradient(45deg, #f44336, #ff6b6b); margin-top: 15px; width: 100%;">
+                ❌ Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- VIP Purchase Modal -->
+    <div class="modal" id="vipModal">
+        <div class="modal-content">
+            <h3 class="modal-title">👑 VIP Membership</h3>
+            <div id="vipOptions">
+                <!-- VIP options will be generated by JavaScript -->
+            </div>
+            <button class="action-btn" onclick="closeModal()" style="background: linear-gradient(45deg, #f44336, #ff6b6b); margin-top: 15px; width: 100%;">
+                ❌ Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Converter Modal -->
+    <div class="modal" id="converterModal">
+        <div class="modal-content">
+            <h3 class="modal-title">🔄 Currency Converter</h3>
+            <div class="form-group">
+                <label>Convert Type:</label>
+                <select id="convertType">
+                    <option value="sbrToUsdt">SBR to USDT (200 SBR = 1 USDT)</option>
+                    <option value="waterToHeavy">Water to Heavy (100 Water = 1 Heavy)</option>
+                    <option value="heavyToSbr">Heavy to SBR (10 Heavy = 5 SBR)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount:</label>
+                <input type="number" id="convertAmount" placeholder="Enter amount">
+            </div>
+            <button class="action-btn" onclick="performConversion()" style="width: 100%; margin-top: 10px;">
+                🔄 Convert
+            </button>
+            <button class="action-btn" onclick="closeModal()" style="background: linear-gradient(45deg, #f44336, #ff6b6b); margin-top: 10px; width: 100%;">
+                ❌ Cancel
+            </button>
         </div>
     </div>
 
@@ -767,9 +1050,13 @@
     <script>
         // Game State
         let gameState = {
-            sbrCoins: 0,
+            sbrCoins: 50,
             usdtBalance: 0,
             waterDrops: 10,
+            boosters: 2,
+            heavyWater: 0,
+            level: 1,
+            xp: 0,
             patches: [],
             inventory: {
                 potato: 1,
@@ -777,25 +1064,39 @@
                 onion: 0,
                 carrot: 0
             },
+            harvestedCrops: {
+                potato: 0,
+                tomato: 0,
+                onion: 0,
+                carrot: 0
+            },
+            wallet: {
+                usdt: 0,
+                ton: 0
+            },
             stats: {
                 harvestCount: 0,
                 totalEarnings: 0
             },
             lastDailyReward: null,
-            lastAdWatch: null
+            lastAdWatch: null,
+            vipStatus: null,
+            completedTasks: []
         };
 
         // Crop Data
         const cropData = {
             potato: {
+                name: 'Potato',
                 icon: '🥔',
-                growthTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+                growthTime: 24 * 60 * 60 * 1000, // 24 hours
                 waterRequired: 10,
                 price: 50,
                 sellValue: 100,
                 currency: 'SBR'
             },
             tomato: {
+                name: 'Tomato',
                 icon: '🍅',
                 growthTime: 48 * 60 * 60 * 1000, // 48 hours
                 waterRequired: 20,
@@ -804,6 +1105,7 @@
                 currency: 'SBR'
             },
             onion: {
+                name: 'Onion',
                 icon: '🧅',
                 growthTime: 96 * 60 * 60 * 1000, // 96 hours
                 waterRequired: 50,
@@ -812,6 +1114,7 @@
                 currency: 'USDT'
             },
             carrot: {
+                name: 'Carrot',
                 icon: '🥕',
                 growthTime: 144 * 60 * 60 * 1000, // 144 hours
                 waterRequired: 1, // 1 heavy drop
@@ -821,36 +1124,112 @@
             }
         };
 
+        // Shop Items
+        const shopItems = {
+            buy: [
+                { type: 'seed', crop: 'potato', name: 'Potato Seeds', icon: '🥔', price: 50, currency: 'SBR', description: 'Fast growing, 24h cycle' },
+                { type: 'seed', crop: 'tomato', name: 'Tomato Seeds', icon: '🍅', price: 100, currency: 'SBR', description: 'Medium growth, 48h cycle' },
+                { type: 'seed', crop: 'onion', name: 'Onion Seeds', icon: '🧅', price: 1, currency: 'USDT', description: 'Slow growth, 96h cycle' },
+                { type: 'seed', crop: 'carrot', name: 'Carrot Seeds', icon: '🥕', price: 5, currency: 'USDT', description: 'Very slow, 144h cycle' },
+                { type: 'booster', name: 'Growth Booster', icon: '⚡', price: 25, currency: 'SBR', description: 'Reduces growth time by 2 hours' },
+                { type: 'patch-part', name: 'Patch Fragment', icon: '🏗️', price: 100, currency: 'SBR', description: '10 parts = 1 new patch' },
+                { type: 'water', name: 'Water Drops (10)', icon: '💧', price: 10, currency: 'SBR', description: 'Essential for crop growth' },
+                { type: 'heavy-water', name: 'Heavy Water', icon: '💎', price: 2, currency: 'USDT', description: 'Premium water for carrots' }
+            ],
+            sell: []
+        };
+
+        // VIP Tiers
+        const vipTiers = [
+            { tier: 1, price: 7, name: 'Bronze Farmer', benefits: ['+1 patch', '2 potato seeds daily'], icon: '🥉' },
+            { tier: 2, price: 15, name: 'Silver Farmer', benefits: ['+1 patch', '5 patch parts', '2 potatoes', '10 water drops daily', 'tomato every 2 days'], icon: '🥈' },
+            { tier: 3, price: 30, name: 'Gold Farmer', benefits: ['+2 patches', '2 potatoes', '20 water drops daily', 'onion every 2 days'], icon: '🥇' },
+            { tier: 4, price: 99, name: 'Diamond Farmer', benefits: ['+3 patches', '2 potatoes + 2 onions daily', 'carrot every 3 days'], icon: '💎' }
+        ];
+
+        // Tasks
+        const dailyTasks = [
+            { id: 'plant_crop', name: 'Plant a Crop', description: 'Plant any crop in your farm', reward: 10, type: 'SBR', icon: '🌱' },
+            { id: 'harvest_crop', name: 'Harvest a Crop', description: 'Harvest any mature crop', reward: 15, type: 'SBR', icon: '🌾' },
+            { id: 'water_plants', name: 'Water 3 Plants', description: 'Water any 3 planted crops', reward: 5, type: 'water', icon: '💧' },
+            { id: 'watch_ad', name: 'Watch an Ad', description: 'Watch an advertisement to earn rewards', reward: 1, type: 'water', icon: '📺' },
+            { id: 'join_channel', name: 'Join Telegram Channel', description: 'Join our official Telegram channel', reward: 50, type: 'SBR', icon: '📢' },
+            { id: 'refer_friend', name: 'Refer a Friend', description: 'Invite a friend to join SBRFARM', reward: 100, type: 'SBR', icon: '👥' }
+        ];
+
         let selectedPatch = null;
+        let soundEnabled = true;
+        let backgroundMusic = null;
+
+        // Audio Context for sound effects
+        let audioContext;
 
         // Initialize Game
         function initGame() {
+            // Initialize audio
+            initAudio();
+            
             // Initialize 3 patches
             for (let i = 0; i < 3; i++) {
                 gameState.patches.push({
                     id: i,
                     crop: null,
                     plantTime: null,
-                    watered: false
+                    watered: false,
+                    boosted: 0
                 });
             }
             
             loadGameState();
             updateUI();
             generateFarmGrid();
+            generateShopItems();
+            generateBagItems();
+            generateTasks();
             startGameLoop();
+            startBackgroundMusic();
             
             // Hide loading screen
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
+                showNotification('🌾 Welcome to SBRFARM! 🌾', 'success');
             }, 2000);
+        }
+
+        // Initialize Audio
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Background Music
+        function startBackgroundMusic() {
+            if (!soundEnabled || !audioContext) return;
+            
+            // Create a simple farming ambient music
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+            
+            oscillator.start();
+            backgroundMusic = oscillator;
         }
 
         // Sound Effects
         function playSound(type) {
+            if (!soundEnabled || !audioContext) return;
+            
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
                 function createTone(frequency, duration, volume = 0.1) {
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
@@ -879,21 +1258,46 @@
                         break;
                     case 'coin':
                         createTone(800, 0.2);
+                        setTimeout(() => createTone(1000, 0.2), 100);
                         break;
                     case 'water':
                         createTone(300, 0.4);
+                        setTimeout(() => createTone(200, 0.3), 200);
                         break;
                     case 'error':
-                        createTone(200, 0.5);
+                        createTone(150, 0.6);
                         break;
                     case 'success':
                         createTone(523, 0.2);
                         setTimeout(() => createTone(659, 0.2), 100);
                         setTimeout(() => createTone(784, 0.3), 200);
                         break;
+                    case 'levelup':
+                        createTone(523, 0.2);
+                        setTimeout(() => createTone(659, 0.2), 100);
+                        setTimeout(() => createTone(784, 0.2), 200);
+                        setTimeout(() => createTone(1047, 0.4), 300);
+                        break;
                 }
             } catch (e) {
-                console.log('Audio not supported');
+                console.log('Sound error:', e);
+            }
+        }
+
+        // Toggle Sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundButton = document.getElementById('soundToggle');
+            
+            if (soundEnabled) {
+                soundButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+                startBackgroundMusic();
+            } else {
+                soundButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                if (backgroundMusic) {
+                    backgroundMusic.stop();
+                    backgroundMusic = null;
+                }
             }
         }
 
@@ -956,24 +1360,183 @@
             
             const now = Date.now();
             const elapsed = now - patch.plantTime;
-            const growthTime = cropData[patch.crop].growthTime;
+            let growthTime = cropData[patch.crop].growthTime;
+            
+            // Apply booster reduction (2 hours per booster)
+            growthTime -= patch.boosted * 2 * 60 * 60 * 1000;
+            growthTime = Math.max(growthTime, 60000); // Minimum 1 minute
+            
             const progress = Math.min(elapsed / growthTime, 1);
             
             const timerElement = document.getElementById(`timer-${patchIndex}`);
             const progressElement = document.getElementById(`progress-${patchIndex}`);
             
-            if (progress >= 1) {
-                timerElement.textContent = 'Ready!';
-                progressElement.style.width = '100%';
-                const patchElement = progressElement.parentElement;
-                patchElement.classList.add('ready');
-            } else {
-                const remaining = growthTime - elapsed;
-                const hours = Math.floor(remaining / (1000 * 60 * 60));
-                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-                timerElement.textContent = `${hours}h ${minutes}m`;
-                progressElement.style.width = (progress * 100) + '%';
+            if (timerElement && progressElement) {
+                if (progress >= 1) {
+                    timerElement.textContent = 'Ready!';
+                    progressElement.style.width = '100%';
+                    const patchElement = progressElement.parentElement;
+                    patchElement.classList.add('ready');
+                } else {
+                    const remaining = growthTime - elapsed;
+                    const hours = Math.floor(remaining / (1000 * 60 * 60));
+                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    timerElement.textContent = `${hours}h ${minutes}m`;
+                    progressElement.style.width = (progress * 100) + '%';
+                }
             }
+        }
+
+        // Generate Shop Items
+        function generateShopItems() {
+            const buyItems = document.getElementById('buyItems');
+            const sellItems = document.getElementById('sellItems');
+            
+            // Buy items
+            buyItems.innerHTML = '';
+            shopItems.buy.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'shop-item';
+                itemElement.onclick = () => buyItem(item);
+                
+                itemElement.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-icon">${item.icon}</div>
+                        <div class="item-details">
+                            <h3>${item.name}</h3>
+                            <p>${item.description}</p>
+                        </div>
+                    </div>
+                    <div class="item-price">${item.price} ${item.currency}</div>
+                `;
+                
+                buyItems.appendChild(itemElement);
+            });
+            
+            // Sell items (harvested crops)
+            sellItems.innerHTML = '';
+            Object.keys(gameState.harvestedCrops).forEach(cropType => {
+                const quantity = gameState.harvestedCrops[cropType];
+                if (quantity > 0) {
+                    const crop = cropData[cropType];
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'shop-item';
+                    itemElement.onclick = () => sellCrop(cropType);
+                    
+                    itemElement.innerHTML = `
+                        <div class="item-info">
+                            <div class="item-icon">${crop.icon}</div>
+                            <div class="item-details">
+                                <h3>${crop.name} (${quantity})</h3>
+                                <p>Sell for ${crop.sellValue} ${crop.currency}</p>
+                            </div>
+                        </div>
+                        <div class="item-price">Sell</div>
+                    `;
+                    
+                    sellItems.appendChild(itemElement);
+                }
+            });
+            
+            if (sellItems.children.length === 0) {
+                sellItems.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No harvested crops to sell. Harvest some crops first! 🌾</p>';
+            }
+        }
+
+        // Generate Bag Items
+        function generateBagItems() {
+            const bagGrid = document.getElementById('bagGrid');
+            bagGrid.innerHTML = '';
+            
+            // Seeds
+            Object.keys(gameState.inventory).forEach(cropType => {
+                const quantity = gameState.inventory[cropType];
+                const crop = cropData[cropType];
+                
+                const bagItem = document.createElement('div');
+                bagItem.className = 'bag-item';
+                bagItem.innerHTML = `
+                    <i class="fas fa-seedling" style="color: ${crop.icon === '🥔' ? '#8B4513' : crop.icon === '🍅' ? '#FF4500' : crop.icon === '🧅' ? '#800080' : '#FF8C00'};"></i>
+                    <h3>${crop.name} Seeds</h3>
+                    <div class="quantity">${quantity}</div>
+                `;
+                
+                bagGrid.appendChild(bagItem);
+            });
+            
+            // Other items
+            const otherItems = [
+                { name: 'Water Drops', icon: 'fas fa-tint', value: gameState.waterDrops, color: '#2196F3' },
+                { name: 'Boosters', icon: 'fas fa-rocket', value: gameState.boosters, color: '#FF9800' },
+                { name: 'Heavy Water', icon: 'fas fa-gem', value: gameState.heavyWater, color: '#9C27B0' },
+                { name: 'Patch Parts', icon: 'fas fa-puzzle-piece', value: gameState.patchParts || 0, color: '#795548' }
+            ];
+            
+            otherItems.forEach(item => {
+                const bagItem = document.createElement('div');
+                bagItem.className = 'bag-item';
+                bagItem.innerHTML = `
+                    <i class="${item.icon}" style="color: ${item.color};"></i>
+                    <h3>${item.name}</h3>
+                    <div class="quantity">${item.value}</div>
+                `;
+                
+                bagGrid.appendChild(bagItem);
+            });
+        }
+
+        // Generate Tasks
+        function generateTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+            
+            dailyTasks.forEach(task => {
+                const completed = gameState.completedTasks.includes(task.id);
+                
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task-item';
+                taskElement.style.opacity = completed ? '0.6' : '1';
+                
+                taskElement.innerHTML = `
+                    <div class="task-header">
+                        <div class="task-title">${task.icon} ${task.name}</div>
+                        <div class="task-reward">+${task.reward} ${task.type === 'SBR' ? 'SBR' : task.type === 'water' ? '💧' : task.type}</div>
+                    </div>
+                    <div class="task-description">${task.description}</div>
+                    <button class="action-btn" onclick="completeTask('${task.id}')" ${completed ? 'disabled' : ''} style="${completed ? 'background: #ccc;' : ''}">
+                        ${completed ? '✅ Completed' : '🎯 Complete Task'}
+                    </button>
+                `;
+                
+                tasksList.appendChild(taskElement);
+            });
+        }
+
+        // Complete Task
+        function completeTask(taskId) {
+            if (gameState.completedTasks.includes(taskId)) {
+                showNotification('Task already completed!', 'warning');
+                return;
+            }
+            
+            const task = dailyTasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Add reward
+            if (task.type === 'SBR') {
+                gameState.sbrCoins += task.reward;
+            } else if (task.type === 'water') {
+                gameState.waterDrops = Math.min(gameState.waterDrops + task.reward, 100);
+            }
+            
+            gameState.completedTasks.push(taskId);
+            
+            playSound('success');
+            showNotification(`✅ Task completed! +${task.reward} ${task.type === 'SBR' ? 'SBR' : '💧'}`, 'success');
+            
+            updateUI();
+            generateTasks();
+            saveGameState();
         }
 
         // Click patch
@@ -983,21 +1546,46 @@
             
             if (!patch.crop) {
                 // Show plant modal
-                document.getElementById('plantModal').classList.add('active');
+                showPlantModal();
             } else {
                 // Check if ready to harvest
                 const now = Date.now();
                 const elapsed = now - patch.plantTime;
-                const growthTime = cropData[patch.crop].growthTime;
+                let growthTime = cropData[patch.crop].growthTime;
+                growthTime -= patch.boosted * 2 * 60 * 60 * 1000;
                 
                 if (elapsed >= growthTime) {
                     harvestCrop(index);
                 } else if (!patch.watered) {
                     waterCrop(index);
                 } else {
-                    showNotification('Crop is already watered and growing!', 'warning');
+                    showNotification('Crop is growing nicely! 🌱', 'warning');
                 }
             }
+        }
+
+        // Show Plant Modal
+        function showPlantModal() {
+            const plantOptions = document.getElementById('plantOptions');
+            plantOptions.innerHTML = '';
+            
+            Object.keys(gameState.inventory).forEach(cropType => {
+                const quantity = gameState.inventory[cropType];
+                if (quantity > 0) {
+                    const crop = cropData[cropType];
+                    const button = document.createElement('button');
+                    button.className = 'action-btn';
+                    button.onclick = () => plantCrop(cropType);
+                    button.innerHTML = `${crop.icon} ${crop.name} (${quantity})`;
+                    plantOptions.appendChild(button);
+                }
+            });
+            
+            if (plantOptions.children.length === 0) {
+                plantOptions.innerHTML = '<p style="text-align: center; color: #666;">No seeds available! Buy some from the shop. 🛒</p>';
+            }
+            
+            document.getElementById('plantModal').classList.add('active');
         }
 
         // Plant crop
@@ -1012,11 +1600,13 @@
             patch.crop = cropType;
             patch.plantTime = Date.now();
             patch.watered = false;
+            patch.boosted = 0;
             
             gameState.inventory[cropType]--;
             
             closeModal();
             generateFarmGrid();
+            generateBagItems();
             updateUI();
             
             // Effects
@@ -1025,7 +1615,7 @@
             const rect = patchElement.getBoundingClientRect();
             createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'water', '🌱');
             
-            showNotification(`Planted ${cropType}!`, 'success');
+            showNotification(`🌱 Planted ${cropData[cropType].name}!`, 'success');
             saveGameState();
         }
 
@@ -1035,17 +1625,28 @@
             if (!patch.crop || patch.watered) return;
             
             const waterRequired = cropData[patch.crop].waterRequired;
+            const isCarrot = patch.crop === 'carrot';
             
-            if (gameState.waterDrops < waterRequired) {
-                showNotification(`Need ${waterRequired} water drops!`, 'error');
+            if (isCarrot && gameState.heavyWater < 1) {
+                showNotification('Need 1 heavy water drop for carrots! 💎', 'error');
+                playSound('error');
+                return;
+            } else if (!isCarrot && gameState.waterDrops < waterRequired) {
+                showNotification(`Need ${waterRequired} water drops! 💧`, 'error');
                 playSound('error');
                 return;
             }
             
-            gameState.waterDrops -= waterRequired;
+            if (isCarrot) {
+                gameState.heavyWater--;
+            } else {
+                gameState.waterDrops -= waterRequired;
+            }
+            
             patch.watered = true;
             
             updateUI();
+            generateBagItems();
             
             // Effects
             playSound('water');
@@ -1053,7 +1654,7 @@
             const rect = patchElement.getBoundingClientRect();
             createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'water', '💧');
             
-            showNotification('Crop watered!', 'success');
+            showNotification('💧 Crop watered!', 'success');
             saveGameState();
         }
 
@@ -1063,49 +1664,183 @@
             if (!patch.crop) return;
             
             const cropType = patch.crop;
-            const sellValue = cropData[cropType].sellValue;
+            const crop = cropData[cropType];
             
-            if (cropData[cropType].currency === 'SBR') {
-                gameState.sbrCoins += sellValue;
-            } else {
-                gameState.usdtBalance += sellValue;
-            }
+            // Add to harvested crops
+            gameState.harvestedCrops[cropType] = (gameState.harvestedCrops[cropType] || 0) + 1;
             
             gameState.stats.harvestCount++;
-            gameState.stats.totalEarnings += sellValue;
+            gameState.xp += 10;
             
             // Reset patch
             patch.crop = null;
             patch.plantTime = null;
             patch.watered = false;
+            patch.boosted = 0;
+            
+            // Check level up
+            checkLevelUp();
             
             generateFarmGrid();
+            generateShopItems();
             updateUI();
             
             // Effects
             playSound('harvest');
-            playSound('coin');
             const patchElement = document.querySelectorAll('.patch')[patchIndex];
             const rect = patchElement.getBoundingClientRect();
-            createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'coin', '💰');
+            createParticle(rect.left + rect.width/2, rect.top + rect.height/2, 'coin', crop.icon);
             
-            showNotification(`Harvested ${cropType} for ${sellValue} ${cropData[cropType].currency}!`, 'success');
+            showNotification(`🌾 Harvested ${crop.name}!`, 'success');
             saveGameState();
         }
 
-        // Water all crops
+        // Check Level Up
+        function checkLevelUp() {
+            const xpNeeded = gameState.level * 100;
+            if (gameState.xp >= xpNeeded) {
+                gameState.level++;
+                gameState.xp -= xpNeeded;
+                
+                playSound('levelup');
+                showNotification(`🎉 Level Up! You are now level ${gameState.level}!`, 'success');
+                
+                // Level up rewards
+                gameState.sbrCoins += gameState.level * 10;
+                gameState.waterDrops = Math.min(gameState.waterDrops + 5, 100);
+                
+                updateUI();
+            }
+        }
+
+        // Buy Item
+        function buyItem(item) {
+            const cost = item.price;
+            const currency = item.currency;
+            
+            if (currency === 'SBR' && gameState.sbrCoins < cost) {
+                showNotification(`Need ${cost} SBR coins!`, 'error');
+                playSound('error');
+                return;
+            } else if (currency === 'USDT' && gameState.usdtBalance < cost) {
+                showNotification(`Need ${cost} USDT!`, 'error');
+                playSound('error');
+                return;
+            }
+            
+            // Deduct cost
+            if (currency === 'SBR') {
+                gameState.sbrCoins -= cost;
+            } else {
+                gameState.usdtBalance -= cost;
+            }
+            
+            // Add item
+            switch(item.type) {
+                case 'seed':
+                    gameState.inventory[item.crop]++;
+                    break;
+                case 'booster':
+                    gameState.boosters++;
+                    break;
+                case 'patch-part':
+                    gameState.patchParts = (gameState.patchParts || 0) + 1;
+                    if (gameState.patchParts >= 10) {
+                        gameState.patchParts -= 10;
+                        // Add new patch
+                        gameState.patches.push({
+                            id: gameState.patches.length,
+                            crop: null,
+                            plantTime: null,
+                            watered: false,
+                            boosted: 0
+                        });
+                        generateFarmGrid();
+                        showNotification('🏗️ New patch unlocked!', 'success');
+                    }
+                    break;
+                case 'water':
+                    gameState.waterDrops = Math.min(gameState.waterDrops + 10, 100);
+                    break;
+                case 'heavy-water':
+                    gameState.heavyWater++;
+                    break;
+            }
+            
+            updateUI();
+            generateBagItems();
+            playSound('success');
+            showNotification(`✅ Purchased ${item.name}!`, 'success');
+            saveGameState();
+        }
+
+        // Sell Crop
+        function sellCrop(cropType) {
+            const quantity = gameState.harvestedCrops[cropType];
+            if (quantity <= 0) return;
+            
+            const crop = cropData[cropType];
+            const earnings = crop.sellValue;
+            
+            gameState.harvestedCrops[cropType]--;
+            
+            if (crop.currency === 'SBR') {
+                gameState.sbrCoins += earnings;
+            } else {
+                gameState.usdtBalance += earnings;
+            }
+            
+            gameState.stats.totalEarnings += earnings;
+            
+            updateUI();
+            generateShopItems();
+            playSound('coin');
+            showNotification(`💰 Sold ${crop.name} for ${earnings} ${crop.currency}!`, 'success');
+            saveGameState();
+        }
+
+        // Watch Ad (Telega.io integration)
+        function watchAd() {
+            try {
+                ads.ad_show({
+                    adBlockUuid: "e94b75fa-2277-46d3-b45f-2b5dbd415d3e"
+                });
+                
+                // Reward after ad (simulate ad completion)
+                setTimeout(() => {
+                    gameState.waterDrops = Math.min(gameState.waterDrops + 1, 100);
+                    gameState.lastAdWatch = Date.now();
+                    
+                    updateUI();
+                    playSound('success');
+                    showNotification('📺 Ad watched! +1 water drop', 'success');
+                    saveGameState();
+                }, 2000);
+                
+            } catch (e) {
+                console.log('Ad not available:', e);
+                showNotification('Ad not available right now!', 'warning');
+            }
+        }
+
+        // Water All Crops
         function waterAllCrops() {
             let watered = 0;
             let totalWaterNeeded = 0;
+            let heavyWaterNeeded = 0;
             
             gameState.patches.forEach(patch => {
                 if (patch.crop && !patch.watered) {
-                    totalWaterNeeded += cropData[patch.crop].waterRequired;
+                    if (patch.crop === 'carrot') {
+                        heavyWaterNeeded++;
+                    } else {
+                        totalWaterNeeded += cropData[patch.crop].waterRequired;
+                    }
                 }
             });
             
-            if (gameState.waterDrops < totalWaterNeeded) {
-                showNotification(`Need ${totalWaterNeeded} water drops total!`, 'error');
+            if (gameState.waterDrops < totalWaterNeeded || gameState.heavyWater < heavyWaterNeeded) {
+                showNotification(`Need ${totalWaterNeeded} water drops and ${heavyWaterNeeded} heavy water!`, 'error');
                 playSound('error');
                 return;
             }
@@ -1118,13 +1853,13 @@
             });
             
             if (watered > 0) {
-                showNotification(`Watered ${watered} crops!`, 'success');
+                showNotification(`💧 Watered ${watered} crops!`, 'success');
             } else {
                 showNotification('No crops need watering!', 'warning');
             }
         }
 
-        // Harvest all ready crops
+        // Harvest All
         function harvestAll() {
             let harvested = 0;
             const now = Date.now();
@@ -1132,7 +1867,8 @@
             gameState.patches.forEach((patch, index) => {
                 if (patch.crop && patch.plantTime) {
                     const elapsed = now - patch.plantTime;
-                    const growthTime = cropData[patch.crop].growthTime;
+                    let growthTime = cropData[patch.crop].growthTime;
+                    growthTime -= patch.boosted * 2 * 60 * 60 * 1000;
                     
                     if (elapsed >= growthTime) {
                         harvestCrop(index);
@@ -1142,72 +1878,190 @@
             });
             
             if (harvested > 0) {
-                showNotification(`Harvested ${harvested} crops!`, 'success');
+                showNotification(`🌾 Harvested ${harvested} crops!`, 'success');
             } else {
                 showNotification('No crops ready to harvest!', 'warning');
             }
         }
 
-        // Buy seedling
-        function buySeedling(cropType) {
-            const price = cropData[cropType].price;
-            const currency = cropData[cropType].currency;
+        // Use Booster All
+        function useBoosterAll() {
+            let boosted = 0;
             
-            if (currency === 'SBR' && gameState.sbrCoins < price) {
-                showNotification(`Need ${price} SBRcoins!`, 'error');
-                playSound('error');
-                return;
-            } else if (currency === 'USDT' && gameState.usdtBalance < price) {
-                showNotification(`Need ${price} USDT!`, 'error');
-                playSound('error');
-                return;
-            }
+            gameState.patches.forEach(patch => {
+                if (patch.crop && gameState.boosters > 0) {
+                    patch.boosted++;
+                    gameState.boosters--;
+                    boosted++;
+                }
+            });
             
-            if (currency === 'SBR') {
-                gameState.sbrCoins -= price;
+            if (boosted > 0) {
+                updateUI();
+                generateBagItems();
+                playSound('success');
+                showNotification(`⚡ Boosted ${boosted} crops!`, 'success');
+                saveGameState();
             } else {
-                gameState.usdtBalance -= price;
+                showNotification('No boosters available or crops to boost!', 'warning');
             }
-            
-            gameState.inventory[cropType]++;
-            
-            updateUI();
-            playSound('success');
-            showNotification(`Purchased ${cropType} seeds!`, 'success');
-            saveGameState();
         }
 
-        // Purchase VIP
-        function purchaseVIP(tier) {
-            const prices = [7, 15, 30, 99];
-            const price = prices[tier - 1];
-            
-            showNotification(`Redirecting to payment for VIP Tier ${tier} ($${price})...`, 'success');
-            
-            // In a real implementation, this would integrate with the Telegram bot
-            // and handle the payment process through the admin dashboard
-        }
-
-        // Join contest
-        function joinContest(type) {
-            const entries = { daily: 20, weekly: 100, monthly: 200 };
-            const entry = entries[type];
-            
-            if (gameState.sbrCoins < entry) {
-                showNotification(`Need ${entry} SBRcoins to enter!`, 'error');
-                playSound('error');
+        // Expand Farm
+        function expandFarm() {
+            const patchParts = gameState.patchParts || 0;
+            if (patchParts < 10) {
+                showNotification(`Need 10 patch parts! You have ${patchParts}`, 'warning');
                 return;
             }
             
-            gameState.sbrCoins -= entry;
-            updateUI();
+            gameState.patchParts -= 10;
+            gameState.patches.push({
+                id: gameState.patches.length,
+                crop: null,
+                plantTime: null,
+                watered: false,
+                boosted: 0
+            });
             
-            showNotification(`Joined ${type} contest!`, 'success');
+            generateFarmGrid();
+            updateUI();
+            generateBagItems();
+            playSound('success');
+            showNotification('🏗️ Farm expanded! New patch added!', 'success');
+            saveGameState();
+        }
+
+        // Show Shop Category
+        function showShopCategory(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.shop-category').forEach(cat => cat.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById(category + '-category').style.display = 'block';
+        }
+
+        // Wallet Functions
+        function showDeposit() {
+            const amount = prompt('Enter deposit amount (USDT):');
+            if (amount && !isNaN(amount) && amount > 0) {
+                showNotification('Deposit request sent to admin for approval!', 'success');
+            }
+        }
+
+        function showWithdraw() {
+            const amount = prompt('Enter withdrawal amount (USDT):');
+            if (amount && !isNaN(amount) && amount > 0) {
+                if (gameState.wallet.usdt >= amount) {
+                    showNotification('Withdrawal request sent to admin for approval!', 'success');
+                } else {
+                    showNotification('Insufficient balance!', 'error');
+                }
+            }
+        }
+
+        function buyVIPFromWallet() {
+            showVIPModal();
+        }
+
+        function showVIPModal() {
+            const vipOptions = document.getElementById('vipOptions');
+            vipOptions.innerHTML = '';
+            
+            vipTiers.forEach(tier => {
+                const option = document.createElement('div');
+                option.style.cssText = 'background: white; padding: 15px; margin: 10px 0; border-radius: 10px; border: 2px solid #90EE90; cursor: pointer;';
+                option.onclick = () => purchaseVIP(tier);
+                
+                option.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4>${tier.icon} ${tier.name}</h4>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                ${tier.benefits.map(benefit => `<li>${benefit}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div style="background: linear-gradient(45deg, #32CD32, #98FB98); color: white; padding: 10px; border-radius: 10px; font-weight: bold;">
+                            $${tier.price}/month
+                        </div>
+                    </div>
+                `;
+                
+                vipOptions.appendChild(option);
+            });
+            
+            document.getElementById('vipModal').classList.add('active');
+        }
+
+        function purchaseVIP(tier) {
+            if (gameState.wallet.usdt >= tier.price) {
+                gameState.wallet.usdt -= tier.price;
+                gameState.vipStatus = tier.tier;
+                
+                closeModal();
+                updateUI();
+                playSound('success');
+                showNotification(`👑 VIP ${tier.name} purchased!`, 'success');
+                saveGameState();
+            } else {
+                showNotification(`Need $${tier.price} USDT in wallet!`, 'error');
+            }
+        }
+
+        function showConverter() {
+            document.getElementById('converterModal').classList.add('active');
+        }
+
+        function performConversion() {
+            const type = document.getElementById('convertType').value;
+            const amount = parseInt(document.getElementById('convertAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showNotification('Enter a valid amount!', 'error');
+                return;
+            }
+            
+            switch(type) {
+                case 'sbrToUsdt':
+                    if (gameState.sbrCoins >= amount && amount >= 200) {
+                        const usdtAmount = Math.floor(amount / 200);
+                        gameState.sbrCoins -= amount;
+                        gameState.usdtBalance += usdtAmount;
+                        showNotification(`Converted ${amount} SBR to ${usdtAmount} USDT!`, 'success');
+                    } else {
+                        showNotification('Need at least 200 SBR to convert!', 'error');
+                    }
+                    break;
+                case 'waterToHeavy':
+                    if (gameState.waterDrops >= amount && amount >= 100) {
+                        const heavyAmount = Math.floor(amount / 100);
+                        gameState.waterDrops -= amount;
+                        gameState.heavyWater += heavyAmount;
+                        showNotification(`Converted ${amount} water to ${heavyAmount} heavy water!`, 'success');
+                    } else {
+                        showNotification('Need at least 100 water drops to convert!', 'error');
+                    }
+                    break;
+                case 'heavyToSbr':
+                    if (gameState.heavyWater >= amount && amount >= 10) {
+                        const sbrAmount = Math.floor(amount / 10) * 5;
+                        gameState.heavyWater -= amount;
+                        gameState.sbrCoins += sbrAmount;
+                        showNotification(`Converted ${amount} heavy water to ${sbrAmount} SBR!`, 'success');
+                    } else {
+                        showNotification('Need at least 10 heavy water to convert!', 'error');
+                    }
+                    break;
+            }
+            
+            updateUI();
+            generateBagItems();
+            closeModal();
             playSound('success');
             saveGameState();
         }
 
-        // Claim daily reward
+        // Claim Daily Reward
         function claimDailyReward() {
             const now = new Date();
             const today = now.toDateString();
@@ -1218,53 +2072,47 @@
             }
             
             gameState.waterDrops = Math.min(gameState.waterDrops + 10, 100);
+            gameState.sbrCoins += 25;
             gameState.lastDailyReward = today;
             
             updateUI();
             playSound('success');
-            showNotification('Claimed 10 water drops!', 'success');
+            showNotification('🎁 Daily reward claimed! +10 water, +25 SBR', 'success');
             saveGameState();
         }
 
-        // Watch ad
-        function watchAd() {
-            const now = Date.now();
-            if (gameState.lastAdWatch && (now - gameState.lastAdWatch) < 60000) {
-                showNotification('Wait 1 minute between ads!', 'warning');
-                return;
-            }
-            
-            gameState.waterDrops = Math.min(gameState.waterDrops + 1, 100);
-            gameState.lastAdWatch = now;
-            
-            updateUI();
-            playSound('success');
-            showNotification('Watched ad! +1 water drop', 'success');
-            saveGameState();
-        }
-
-        // Show referral
         function showReferral() {
-            showNotification('Referral system coming soon!', 'warning');
+            showNotification('Referral system: Share SBRFARM with friends!', 'success');
         }
 
-        // Show section
+        function joinTelegramChannel() {
+            gameState.waterDrops = Math.min(gameState.waterDrops + 5, 100);
+            updateUI();
+            showNotification('📢 Thanks for joining! +5 water drops', 'success');
+            saveGameState();
+        }
+
+        // Navigation
         function showSection(sectionName) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             
-            // Remove active class from nav items
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Show selected section
             document.getElementById(sectionName).classList.add('active');
-            
-            // Add active class to clicked nav item
             event.target.classList.add('active');
+            
+            // Refresh section content
+            if (sectionName === 'shop') {
+                generateShopItems();
+            } else if (sectionName === 'bag') {
+                generateBagItems();
+            } else if (sectionName === 'tasks') {
+                generateTasks();
+            }
         }
 
         // Update UI
@@ -1272,9 +2120,16 @@
             document.getElementById('sbrCoins').textContent = gameState.sbrCoins;
             document.getElementById('usdtBalance').textContent = gameState.usdtBalance.toFixed(2);
             document.getElementById('waterDrops').textContent = gameState.waterDrops;
-            document.getElementById('patchCount').textContent = gameState.patches.length;
-            document.getElementById('harvestCount').textContent = gameState.stats.harvestCount;
-            document.getElementById('totalEarnings').textContent = gameState.stats.totalEarnings;
+            document.getElementById('boosters').textContent = gameState.boosters;
+            document.getElementById('heavyWater').textContent = gameState.heavyWater;
+            document.getElementById('playerLevel').textContent = gameState.level;
+            document.getElementById('profileLevel').textContent = gameState.level;
+            document.getElementById('profilePatches').textContent = gameState.patches.length;
+            document.getElementById('profileHarvests').textContent = gameState.stats.harvestCount;
+            document.getElementById('profileEarnings').textContent = gameState.stats.totalEarnings;
+            document.getElementById('profileVIP').textContent = gameState.vipStatus ? `Tier ${gameState.vipStatus}` : 'None';
+            document.getElementById('walletUSDT').textContent = gameState.wallet.usdt.toFixed(2);
+            document.getElementById('walletTON').textContent = gameState.wallet.ton.toFixed(2);
         }
 
         // Show notification
@@ -1303,6 +2158,9 @@
                         updatePatchProgress(index);
                     }
                 });
+                
+                // Auto-save every minute
+                saveGameState();
             }, 60000); // Update every minute
         }
 
@@ -1315,7 +2173,22 @@
         function loadGameState() {
             const saved = localStorage.getItem('sbrfarm-game');
             if (saved) {
-                gameState = { ...gameState, ...JSON.parse(saved) };
+                const savedState = JSON.parse(saved);
+                gameState = { ...gameState, ...savedState };
+                
+                // Ensure patches array exists
+                if (!gameState.patches || gameState.patches.length === 0) {
+                    gameState.patches = [];
+                    for (let i = 0; i < 3; i++) {
+                        gameState.patches.push({
+                            id: i,
+                            crop: null,
+                            plantTime: null,
+                            watered: false,
+                            boosted: 0
+                        });
+                    }
+                }
             }
         }
 
