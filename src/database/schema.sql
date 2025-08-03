@@ -247,6 +247,18 @@ INSERT OR IGNORE INTO system_settings (setting_key, setting_value, setting_type,
 ('ad_cooldown_minutes', '1', 'number', 'Cooldown between ad watches'),
 ('referral_bonus_percentage', '10', 'number', 'Referral bonus percentage');
 
+-- Notifications table for admin messages and system notifications
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    telegram_id INTEGER NOT NULL,
+    message TEXT NOT NULL,
+    type TEXT DEFAULT 'admin', -- 'admin', 'system', 'payment', 'contest'
+    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    read_at DATETIME,
+    priority TEXT DEFAULT 'normal', -- 'low', 'normal', 'high', 'urgent'
+    FOREIGN KEY (telegram_id) REFERENCES users (telegram_id)
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_patches_telegram_id ON patches(telegram_id);
@@ -260,3 +272,5 @@ CREATE INDEX IF NOT EXISTS idx_contests_type ON contests(type);
 CREATE INDEX IF NOT EXISTS idx_contests_status ON contests(status);
 CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_referrals_referred ON referrals(referred_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_telegram_id ON notifications(telegram_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_sent_at ON notifications(sent_at);

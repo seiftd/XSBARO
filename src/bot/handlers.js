@@ -413,6 +413,11 @@ Share your link and earn rewards! 🎉
 • Binance Pay: 5 USDT
 • TON Wallet: 1 TON
 • TRC20: 4 USDT
+
+<b>💳 Payment Methods:</b>
+• Binance ID: 713636914
+• TON: UQBVeJflae5yTTgS6wczgpDkDcyEAnmA88bZyaiB3lYGqWw9
+• TRC20: TLDsutnxpdLZaRxhGWBJismwsjY3WiTHWX
             `;
 
             const keyboard = this.getWalletKeyboard(user);
@@ -422,6 +427,103 @@ Share your link and earn rewards! 🎉
             });
         } catch (error) {
             console.error('Wallet command error:', error);
+            await ctx.reply(`❌ ${error.message}`);
+        }
+    }
+
+    // VIP Purchase Handler
+    async handleVIPPurchase(ctx) {
+        try {
+            const telegramId = ctx.from.id;
+            const tier = parseInt(ctx.match[1]);
+            
+            if (!tier || tier < 1 || tier > 4) {
+                await ctx.reply('❌ Invalid VIP tier selected');
+                return;
+            }
+
+            const prices = { 1: 7, 2: 15, 3: 30, 4: 99 };
+            const price = prices[tier];
+
+            // Create pending transaction
+            await this.game.db.createTransaction(
+                telegramId, 
+                'vip_purchase', 
+                price, 
+                'USDT', 
+                `VIP Tier ${tier} subscription`,
+                { payment_method: 'manual_approval' }
+            );
+
+            const message = `
+🌟 <b>VIP Tier ${tier} Purchase</b>
+
+💰 Amount: $${price} USD
+
+<b>Payment Instructions:</b>
+
+<b>Method 1 - Binance Pay:</b>
+• Send $${price} to Binance ID: <code>713636914</code>
+• Send screenshot and your Binance ID to admin
+
+<b>Method 2 - TON Wallet:</b>
+• Send ${(price / 3.5).toFixed(2)} TON to:
+<code>UQBVeJflae5yTTgS6wczgpDkDcyEAnmA88bZyaiB3lYGqWw9</code>
+• Send transaction hash to admin
+
+<b>Method 3 - TRC20 USDT:</b>
+• Send ${price} USDT (TRC20) to:
+<code>TLDsutnxpdLZaRxhGWBJismwsjY3WiTHWX</code>
+• Send transaction hash to admin
+
+After payment, admin will approve your VIP subscription manually.
+            `;
+
+            await ctx.reply(message, { parse_mode: 'HTML' });
+        } catch (error) {
+            console.error('VIP purchase error:', error);
+            await ctx.reply(`❌ ${error.message}`);
+        }
+    }
+
+    // Withdrawal Request Handler
+    async handleWithdrawalRequest(ctx) {
+        try {
+            const telegramId = ctx.from.id;
+            await this.game.validateUser(telegramId);
+            
+            const user = await this.game.getUserProfile(telegramId);
+            const usdtValue = this.game.convertSBRtoUSDT(user.sbr_coins);
+            
+            if (usdtValue < 5) {
+                await ctx.reply('❌ Minimum withdrawal is 5 USDT (1000 SBRcoins)');
+                return;
+            }
+
+            const message = `
+💸 <b>Withdrawal Request</b>
+
+<b>Available Balance:</b>
+• ${user.sbr_coins} SBRcoins
+• ${usdtValue.toFixed(2)} USDT equivalent
+
+<b>Select withdrawal method:</b>
+            `;
+
+            const keyboard = {
+                inline_keyboard: [
+                    [{ text: '💰 Binance Pay (Min: 5 USDT)', callback_data: 'withdraw_binance' }],
+                    [{ text: '🔷 TON Wallet (Min: 1 TON)', callback_data: 'withdraw_ton' }],
+                    [{ text: '💎 TRC20 USDT (Min: 4 USDT)', callback_data: 'withdraw_trc20' }]
+                ]
+            };
+
+            await ctx.reply(message, { 
+                reply_markup: keyboard,
+                parse_mode: 'HTML'
+            });
+        } catch (error) {
+            console.error('Withdrawal request error:', error);
             await ctx.reply(`❌ ${error.message}`);
         }
     }

@@ -1,11 +1,13 @@
 const { Telegraf } = require('telegraf');
 const BotHandlers = require('./handlers');
+const NotificationSystem = require('./notification');
 require('dotenv').config();
 
 class SBRFarmBot {
     constructor() {
         this.bot = new Telegraf(process.env.BOT_TOKEN);
         this.handlers = new BotHandlers();
+        this.notifications = new NotificationSystem(this.bot);
         this.setupMiddleware();
         this.setupCommands();
         this.setupCallbacks();
